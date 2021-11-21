@@ -1,0 +1,15 @@
+{% extends 'mystudy_app/base.html' %}
+
+{% block content %}
+    <div class="login-content">
+        <div class="login-form">
+            <form method="post">
+                <div class="login-form-inner">
+                    {% csrf_token %}
+                    {{ form.as_table }}
+                    <input type="submit" value="Войти">
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

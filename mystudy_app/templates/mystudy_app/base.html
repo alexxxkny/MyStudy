@@ -1,0 +1,65 @@
+{% load static %}
+{% load mystudy_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/zero.css' %}">
+</head>
+<body>
+<div class="container">
+
+{% block header %}
+<div class="header">
+    {% get_nav_menu as nav_menu %}
+    {% for nav_block in nav_menu %}
+        <div class="nav-block">
+            <div class="nav-block__content">
+                <a href={% url nav_block.url_name %}>{{ nav_block.title }}</a>
+            </div>
+        </div>
+    {% endfor %}
+    {% get_login_menu as log_menu %}
+    {% if request.user.is_authenticated %}
+        {% for log_block in log_menu %}
+            {% if log_block.authenticated %}
+                <div class="nav-block">
+                    <div class="nav-block__content">
+                        <a href={% url log_block.url_name %}>{{ log_block.title }}</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {% for log_block in log_menu %}
+            {% if not log_block.authenticated %}
+                <div class="nav-block">
+                    <div class="nav-block__content">
+                        <a href={% url log_block.url_name %}>{{ log_block.title }}</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
+
+<div class="content">
+{% block content %}
+
+{% endblock %}
+</div>
+
+{% block footer %}
+<div class="footer">
+    <div class="wisdom">
+        <p>Универ не жизнь - можно и проебать</p>
+    </div>
+</div>
+{% endblock %}
+
+</div>
+</body>
+</html>

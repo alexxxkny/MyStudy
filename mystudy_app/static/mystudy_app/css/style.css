@@ -1,0 +1,85 @@
+html, body{
+    width: 100%;
+    height: 100%;
+}
+
+.container{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+input{
+    border: 1px solid black;
+}
+
+/*-- HEADER START --*/
+.header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: aquamarine;
+    height: 50px;
+    width: 100%;
+}
+
+.nav-block{
+    margin: 0 20px;
+}
+
+.nav-block__content{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.nav-block__content a{
+    color: black;
+}
+/*-- HEADER END --*/
+
+/*-- CONTENT START --*/
+
+.content{
+    width: 100%;
+    flex: 1 1 auto;
+    align-self: center;
+}
+
+/*---- LOGIN CONTENT START ----*/
+
+.login-content{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-form{
+    width: 40%;
+    height: auto;
+}
+
+.login-form-inner{
+    display: flex;
+    flex-direction: column;
+}
+
+/*---- LOGIN CONTENT START ----*/
+
+/*-- CONTENT END --*/
+
+/*-- FOOTER START --*/
+.footer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: aquamarine;
+    height: 32px;
+}
+
+.wisdom{
+    font-size: 16px;
+}
+/*-- FOOTER END --*/
