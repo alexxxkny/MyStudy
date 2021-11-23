@@ -1,7 +1,6 @@
 {% extends 'mystudy_app/base.html' %}
 
-
-{
 {% block content %}
-Главная
+Пользователь: {{ request.user.username }}<br>
+Группа: {{ request.user.group }}
 {% endblock %}

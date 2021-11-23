@@ -1,0 +1,23 @@
+{% extends 'mystudy_app/base.html' %}
+
+{% block content %}
+    <a href="{% url 'mystudy_app:group_registration' %}">Зарегистрировать группу</a>
+    <div class="search-form">
+        <form method="get">
+            <input type="search" name="q">
+            <input type="submit" value="Поиск">
+        </form>
+    </div>
+    <ul>
+        {% for group in groups %}
+            <li>
+                <a href="{% url 'mystudy_app:group' group.group_slug %}">{{ group.name }}</a>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="submit" name="join" value="Присоединиться">
+                    <input type="hidden" name="group_pk" value="{{ group.pk }}">
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

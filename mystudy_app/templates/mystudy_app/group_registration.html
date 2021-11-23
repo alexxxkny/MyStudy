@@ -1,9 +1,16 @@
 {% extends 'mystudy_app/base.html' %}
 
+{% block header %}{% endblock %}
+
 {% block content %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_table }}
-        <input type="submit" value="Регистрация">
-    </form>
+<div class="auth-content">
+    <div class="auth-form-container">
+        {% include 'mystudy_app/auth_form.html' with btn_value='Регистрация' %}
+        <div class="alt-link">
+            <a href={% url 'mystudy_app:login' %}>Уже есть группа?</a>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
+{% block footer %}{% endblock %}

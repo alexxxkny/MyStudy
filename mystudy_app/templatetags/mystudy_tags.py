@@ -11,6 +11,7 @@ def get_nav_menu():
         {'title': 'Расписание', 'url_name': 'mystudy_app:schedule'},
         {'title': 'Задачи', 'url_name': 'mystudy_app:todo'},
         {'title': 'Файлы', 'url_name': 'mystudy_app:files'},
+        {'title': 'Группы', 'url_name': 'mystudy_app:all_groups'},
     ]
 
 

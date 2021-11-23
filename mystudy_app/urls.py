@@ -10,5 +10,8 @@ urlpatterns = [
     path('files/', index, name='files'),
     path('login/', LoginUserView.as_view(), name='login'),
     path('logout/', logout_user, name='logout'),
-    path('register/', RegisterUserView.as_view(), name='registration'),
+    path('registration/', RegisterUserView.as_view(), name='registration'),
+    path('groups/registration/', RegisterGroupView.as_view(), name='group_registration'),
+    path('groups/', AllGroupsView.as_view(), name='all_groups'),
+    path('groups/<slug:group_slug>', GroupView.as_view(), name='group'),
 ]

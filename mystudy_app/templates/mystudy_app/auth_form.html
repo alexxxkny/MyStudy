@@ -1,0 +1,18 @@
+ <form method="post">
+    <div class="auth-form">
+        {% csrf_token %}
+        <div class="auth-form__error">
+            {{ form.non_field_errors }}
+        </div>
+        {% for row in form %}
+            <div class="auth-form__label">
+                {{ row.label }}:
+            </div>
+            {{ row }} <!-- class="auth-form__input" -->
+            <div class="auth-form__error">
+                {{ row.errors }}
+            </div>
+        {% endfor %}
+        <input class="auth-form__btn" type="submit" value="{{ btn_value }}">
+    </div>
+</form>

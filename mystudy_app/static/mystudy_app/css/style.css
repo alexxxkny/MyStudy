@@ -46,9 +46,9 @@ input{
     align-self: center;
 }
 
-/*---- LOGIN CONTENT START ----*/
+/*---- AUTH CONTENT START ----*/
 
-.login-content{
+.auth-content{
     height: 100%;
     width: 100%;
     display: flex;
@@ -56,17 +56,54 @@ input{
     align-items: center;
 }
 
-.login-form{
-    width: 40%;
+.auth-form-container{
+    width: auto;
     height: auto;
+
+    background-color: white;
+    padding: 7px;
+    border: 2px solid grey;
 }
 
-.login-form-inner{
+.auth-form{
+    display: grid;
+    grid-template-columns: auto 1fr 6fr;
+    grid-auto-rows: auto;
+    row-gap: 10px;
+}
+
+.auth-form__label{
+    grid-column: 1;
+    justify-self: end;
+}
+
+.auth-form__input{
+    grid-column: -2;
+}
+
+.auth-form__error{
+    grid-column: 1/-1;
+    text-wrap: normal;
+}
+
+.auth-form__btn{
+    grid-column: -2;
+}
+
+.alt-link{
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    margin: 10px 0 0 0;
 }
 
-/*---- LOGIN CONTENT START ----*/
+/*------ LOGIN START ------*/
+
+
+
+/*------ LOGIN START ------*/
+
+
+/*---- AUTH CONTENT END ----*/
 
 /*-- CONTENT END --*/
 
