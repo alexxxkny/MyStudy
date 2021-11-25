@@ -5,10 +5,9 @@
             {{ form.non_field_errors }}
         </div>
         {% for row in form %}
-            <div class="auth-form__label">
-                {{ row.label }}:
+            <div class="auth-form__row">
+                {{ row }}
             </div>
-            {{ row }} <!-- class="auth-form__input" -->
             <div class="auth-form__error">
                 {{ row.errors }}
             </div>

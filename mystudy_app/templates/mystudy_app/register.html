@@ -1,14 +1,51 @@
 {% extends 'mystudy_app/base.html' %}
+{% load static %}
 
 {% block header %}{% endblock %}
 
 {% block content %}
 <div class="auth-content">
     <div class="auth-form-container">
-        {% include 'mystudy_app/auth_form.html' with btn_value='Регистрация' %}
-        <div class="alt-link">
-            <a href={% url 'mystudy_app:login' %}>Уже есть аккаунт?</a>
+        <div class="auth-title">
+            <div class="auth-title__content">
+                <p>Создать аккаунт</p>
+            </div>
         </div>
+        <form method="post">
+            <div class="auth-form">
+                {% csrf_token %}
+                <div class="auth-form__row">
+                    <img src="{% static 'mystudy_app/images/icons/user_icon.png' %}">
+                    {{ form.username }}
+                </div>
+                <div class="auth-form__row">
+                    <img src="{% static 'mystudy_app/images/icons/password_icon.png' %}" alt="">
+                    {{ form.password1 }}
+                </div>
+                <div class="auth-form__row">
+                    {{ form.password2 }}
+                </div>
+                <div class="auth-form__row">
+                    <img src="{% static 'mystudy_app/images/icons/fio_icon.png' %}" alt="">
+                    {{ form.last_name }}
+                </div>
+                <div class="auth-form__row">
+                    {{ form.first_name }}
+                </div>
+                <div class="auth-form__row">
+                    {{ form.middle_name }}
+                </div>
+                <div class="auth-form__row">
+                    <img src="{% static 'mystudy_app/images/icons/mail_icon.png' %}" alt="">
+                    {{ form.email }}
+                </div>
+                {% include 'mystudy_app/auth_form_errors.html' %}
+                <input class="auth-form__btn" type="submit" value="Регистрация">
+            </div>
+            <div class="alt-link">
+                <a href={% url 'mystudy_app:login' %}>Уже есть аккаунт?</a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

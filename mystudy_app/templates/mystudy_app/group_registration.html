@@ -1,11 +1,27 @@
 {% extends 'mystudy_app/base.html' %}
+{% load static %}
 
 {% block header %}{% endblock %}
 
 {% block content %}
 <div class="auth-content">
     <div class="auth-form-container">
-        {% include 'mystudy_app/auth_form.html' with btn_value='Регистрация' %}
+        <div class="auth-title">
+            <div class="auth-title__content">
+                <p>Создать группу</p>
+            </div>
+        </div>
+        <form method="post">
+            <div class="auth-form">
+                {% csrf_token %}
+                <div class="auth-form__row">
+                    <img src="{% static 'mystudy_app/images/icons/group_name_icon.png' %}" alt="">
+                    {{ form.name }}
+                </div>
+                {% include 'mystudy_app/auth_form_errors.html' %}
+                <input class="auth-form__btn" type="submit" value="Регистрация">
+            </div>
+        </form>
         <div class="alt-link">
             <a href={% url 'mystudy_app:login' %}>Уже есть группа?</a>
         </div>

@@ -1,0 +1,15 @@
+{% load static %}
+{% if form.non_field_errors or form.errors %}
+    <div class="auth-form__row">
+        <img src="{% static 'mystudy_app/images/icons/error_icon.png' %}" alt="">
+        <div class="auth-form__error">
+        {% if form.non_field_errors %}
+            {{ form.non_field_errors.0 }}
+        {% else%}
+            {% for error in form.errors.values %}
+                {{ error }}
+            {% endfor %}
+        {% endif %}
+        </div>
+    </div>
+{% endif %}
