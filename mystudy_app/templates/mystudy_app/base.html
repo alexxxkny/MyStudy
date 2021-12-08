@@ -7,59 +7,96 @@
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{% static 'mystudy_app/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'mystudy_app/css/zero.css' %}">
+    {% block links %}
+
+    {% endblock %}
 </head>
 <body>
 <div class="container">
 
 {% block header %}
 <div class="header">
-    {% get_nav_menu as nav_menu %}
-    {% for nav_block in nav_menu %}
-        <div class="nav-block">
-            <div class="nav-block__content">
-                <a href={% url nav_block.url_name %}>{{ nav_block.title }}</a>
-            </div>
+    <div class="header-nav logo">
+        <a href="{% url 'mystudy_app:news' %}">
+            <img src="{% static "mystudy_app/images/logo.svg" %}" alt="">
+        </a>
+    </div>
+    <div class="header-nav modules">
+        <div class="header-nav__block">
+            <a href="{% url 'mystudy_app:news' %}">
+                <div class="module-link">
+                    <img class="" src="{% static 'mystudy_app/images/icons/nav/news.svg' %}" alt="">
+                    <p>Новости</p>
+                </div>
+            </a>
         </div>
-    {% endfor %}
-    {% get_login_menu as log_menu %}
-    {% if request.user.is_authenticated %}
-        {% for log_block in log_menu %}
-            {% if log_block.authenticated %}
-                <div class="nav-block">
-                    <div class="nav-block__content">
-                        <a href={% url log_block.url_name %}>{{ log_block.title }}</a>
-                    </div>
+        <div class="header-nav__block">
+            <a href="{% url 'mystudy_app:schedule' %}">
+                <div class="module-link">
+                    <img class="" src="{% static 'mystudy_app/images/icons/nav/schedule.svg' %}" alt="">
+                    <p>Расписание</p>
                 </div>
-            {% endif %}
-        {% endfor %}
-    {% else %}
-        {% for log_block in log_menu %}
-            {% if not log_block.authenticated %}
-                <div class="nav-block">
-                    <div class="nav-block__content">
-                        <a href={% url log_block.url_name %}>{{ log_block.title }}</a>
-                    </div>
+            </a>
+        </div>
+        <div class="header-nav__block">
+            <a href="{% url 'mystudy_app:todo' %}">
+                <div class="module-link">
+                    <img class="" src="{% static 'mystudy_app/images/icons/nav/todo.svg' %}" alt="">
+                    <p>Задачи</p>
                 </div>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-</div>
-{% endblock %}
+            </a>
+        </div>
+        <div class="header-nav__block">
+            <a href="{% url 'mystudy_app:files' %}">
+                <div class="module-link">
+                    <img class="" src="{% static 'mystudy_app/images/icons/nav/files.svg' %}" alt="">
+                    <p>Файлы</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="header-nav tools">
+        {% block tools %}
 
-<div class="content">
-{% block content %}
-
-{% endblock %}
-</div>
-
-{% block footer %}
-<div class="footer">
-    <div class="wisdom">
-        <p>Типа футер</p>
+        {% endblock %}
+    </div>
+    <div class="header-nav auth">
+        <div class="header-nav__block">
+            <a href="{% url 'mystudy_app:all_groups' %}">
+                <img class="profile-icon" src="{% static 'mystudy_app/images/icons/nav/user.svg' %}" alt="">
+            </a>
+        </div>
+        <div class="header-nav__block">
+            <a href="{% url 'mystudy_app:logout' %}">
+                <img class="exit-icon" src="{% static 'mystudy_app/images/icons/nav/exit.svg' %}" alt="">
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}
+<div class="main">
+    <div class="sidebar">
+        {% block sidebar %}
+        
+        {% endblock %}
+    </div>
+    <div class="content">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+</div>
+
+{% block footer %}
+
+{% endblock %}
 
 </div>
+{% csrf_token %}
+<script src="{% static 'mystudy_app/js/base.js' %}">
+</script>
+{% block scripts %}
+
+{% endblock %}
 </body>
 </html>

@@ -1,0 +1,77 @@
+{% extends 'mystudy_app/schedule/base_schedule.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div class="narrow-content">
+        <div class="schedule-week">
+            <label for="week_input" class="schedule-week__text">Первая неделя (с нее начнется заполнение календаря):</label>
+            <input id="week_input" type="week">
+        </div>
+        <div class="options-settings">
+            <div class="options-settings__row">
+
+                <div class="options-settings__select">
+                    <div class="options-settings__title">
+                        <p>Виды</p>
+                    </div>
+                    <div class="options-settings__info">
+                        <p>Виды занятий</p>
+                    </div>
+                    <div class="options-settings__form">
+                        {% for format in formats %}
+                        <div class="options-settings__option" data-id="{{ format.pk }}">
+                            <div class="options-settings__name">
+                                <p>
+                                    {{ format.name }}
+                                </p>
+                            </div>
+                            <div class="options-settings__color">
+                                <input type="color" value="#{{ format.color }}">
+                            </div>
+                            <div class="options-settings__edit">
+                                <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="options-settings__add-row">
+                        <button>+</button>
+                    </div>
+                </div>
+                <div class="options-settings__example">
+
+                </div>
+            </div>
+
+
+        </div>
+        <div id="edit_popup" class="popup">
+            <div class="popup__inner">
+
+
+                    <input type="text" class="base-input" name="name">
+                    <button id="delete_format_btn">
+                        <img src="http://127.0.0.1:8000/static/mystudy_app/images/icons/delete_icon.svg" alt="">
+                    </button>
+                    <input type="submit" class="base-btn" value="Сохранить">
+
+            </div>
+        </div>
+        <div id="add_popup" class="popup">
+            <div class="popup__inner">
+                <form method="post">
+
+                    <input type="text" class="base-input" name="name">
+                    <input type="color" value="#FFFFFF" name="color">
+                    <input type="submit" class="base-btn" value="Добавить">
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'mystudy_app/js/schedule_settings.js' %}"></script>
+{% endblock %}

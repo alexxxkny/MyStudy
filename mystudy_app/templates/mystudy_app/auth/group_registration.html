@@ -18,7 +18,13 @@
                     <img src="{% static 'mystudy_app/images/icons/group_name_icon.png' %}" alt="">
                     {{ form.name }}
                 </div>
-                {% include 'mystudy_app/auth_form_errors.html' %}
+                <div class="auth-form__row">
+                    {{ form.organization }}
+                </div>
+                <div class="auth-form__row">
+                    {{ form.specialization }}
+                </div>
+                {% include 'mystudy_app/auth/auth_form_errors.html' %}
                 <input class="auth-form__btn" type="submit" value="Регистрация">
             </div>
         </form>

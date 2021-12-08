@@ -42,7 +42,11 @@ class LoginUserForm(AuthenticationForm):
 class RegistrationGroupForm(ModelForm):
     name = CharField(label='Название группы', widget=TextInput(attrs={'class': auth_input_class,
                                                                       'placeholder': 'Название группы'}))
+    organization = CharField(label='Учебное заведение', widget=TextInput(attrs={'class': auth_input_class,
+                                                                                'placeholder': 'Учебное заведение'}))
+    specialization = CharField(label='Направление', widget=TextInput(attrs={'class': auth_input_class,
+                                                                            'placeholder': 'Направление'}))
 
     class Meta:
         model = Group
-        fields = ['name', ]
+        fields = ['name', 'organization', 'specialization']

@@ -1,0 +1,28 @@
+{% extends 'mystudy_app/schedule/base_schedule.html' %}
+{% load static %}
+
+{% block content %}
+    <button id="btn">Click</button>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        //const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const btn = document.getElementById('btn')
+        btn.addEventListener('click', async (e) => {
+            let response = await fetch("#", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({'action': 'send'})
+            })
+
+            if(response.ok){
+                let json_text = await response.json()
+                console.log(json_text['text'])
+            }
+        })
+    </script>
+{% endblock %}

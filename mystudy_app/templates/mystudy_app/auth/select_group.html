@@ -1,0 +1,56 @@
+{% extends 'mystudy_app/base.html' %}
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/group_selection.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="narrow-content">
+    <div class="select-group-title">
+        <p class="select-group-title__content">
+            Необходимо присоединиться к группе
+        </p>
+    </div>
+    <div class="select-group-text">
+        <p class="select-group-text__content">Чтобы воспользоваться всем функционалом сайта необходимо присоединиться к своей группе или создать новую</p>
+    </div>
+    <form method="get" class="select-group-form">
+        {% csrf_token %}
+        <div class="select-group-form__grid">
+            <div class="select-group-form__input">
+                <input type="text" name="q" class="base-input">
+            </div>
+            <input type="submit" value="Найти группу" class="base-btn">
+            <p class="text20">или</p>
+            <div class="base-btn base-btn_link">
+                <a href="{% url 'mystudy_app:group_registration' %}">
+                    Создать группу
+                </a>
+            </div>
+        </div>
+    </form>
+    <div class="select-group-search-result">
+        {% for group in groups %}
+            <div class="select-group-search-result__row">
+                <div class="select-group-search-result__join">
+                    <div class="select-group-search-result__name">
+                        {{ group.name }}
+                    </div>
+                    <div class="select-group-search-result__btn">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input class="base-btn" type="submit" value="Присоединиться">
+                            <input type="hidden" name="group_pk" value="{{ group.pk }}">
+                        </form>
+                    </div>
+                </div>
+                <div class="select-group-search-result__info">
+                    <p>{{ group.organization }}</p>
+                    <p>{{ group.specialization }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

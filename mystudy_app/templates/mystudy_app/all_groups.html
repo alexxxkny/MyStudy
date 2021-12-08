@@ -10,7 +10,7 @@
     </div>
     <ul>
         {% for group in groups %}
-            <li>
+            <li data-id="12">
                 <a href="{% url 'mystudy_app:group' group.group_slug %}">{{ group.name }}</a>
                 <form method="post">
                     {% csrf_token %}

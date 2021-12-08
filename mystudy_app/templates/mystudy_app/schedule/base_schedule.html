@@ -1,0 +1,34 @@
+{% extends 'mystudy_app/base.html' %}
+
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/schedule.css' %}">
+{% endblock %}
+
+{% block tools %}
+    <div class="header-nav__block">
+        <a href="{% url 'mystudy_app:schedule' %}">
+            <div class="module-link">
+                <img class="" src="{% static 'mystudy_app/images/icons/nav/schedule.svg' %}" alt="">
+                <p>Календарь</p>
+            </div>
+        </a>
+    </div>
+    <div class="header-nav__block">
+        <a href="{% url 'mystudy_app:week_templates' %}">
+            <div class="module-link">
+                <img class="" src="{% static 'mystudy_app/images/icons/nav/schedule_template_icon.svg' %}" alt="">
+                <p>Шаблоны</p>
+            </div>
+        </a>
+    </div>
+    <div class="header-nav__block">
+        <a href="{% url 'mystudy_app:schedule_settings' %}">
+            <div class="module-link">
+                <img class="" src="{% static 'mystudy_app/images/icons/nav/settings_icon.svg' %}" alt="">
+                <p>Настройки</p>
+            </div>
+        </a>
+    </div>
+{% endblock %}
