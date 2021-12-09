@@ -59,3 +59,4 @@ class LessonFormat(models.Model):
     name = models.CharField(max_length=20)
     color = models.CharField(max_length=6)
     group = models.ForeignKey('Group', on_delete=models.CASCADE)
+

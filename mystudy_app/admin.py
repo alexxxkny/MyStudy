@@ -12,3 +12,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'group_slug')
+
+
+@admin.register(LessonFormat)
+class LessonFormatAdmin(admin.ModelAdmin):
+    list_display = ('name', 'color', 'group')

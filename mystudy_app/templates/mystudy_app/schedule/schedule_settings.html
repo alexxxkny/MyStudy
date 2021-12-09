@@ -13,10 +13,10 @@
 
                 <div class="options-settings__select">
                     <div class="options-settings__title">
-                        <p>Виды</p>
+                        <p>Форматы занятий</p>
                     </div>
                     <div class="options-settings__info">
-                        <p>Виды занятий</p>
+                        <p>Очно? Дистанционно? Онлайн курс? Или как?</p>
                     </div>
                     <div class="options-settings__form">
                         {% for format in formats %}
@@ -40,7 +40,11 @@
                     </div>
                 </div>
                 <div class="options-settings__example">
-
+                    <div id="example-node" class="node node_example">
+                        <p class="node__lesson">Предмет</p>
+                        <p class="node__type">Вид занятия</p>
+                        <p class="node__room">Аудитория</p>
+                    </div>
                 </div>
             </div>
 
@@ -48,20 +52,18 @@
         </div>
         <div id="edit_popup" class="popup">
             <div class="popup__inner">
-
-
+                <form id="edit-form">
                     <input type="text" class="base-input" name="name">
-                    <button id="delete_format_btn">
-                        <img src="http://127.0.0.1:8000/static/mystudy_app/images/icons/delete_icon.svg" alt="">
-                    </button>
                     <input type="submit" class="base-btn" value="Сохранить">
-
+                </form>
+                <button id="delete_format_btn">
+                    <img src="http://127.0.0.1:8000/static/mystudy_app/images/icons/delete_icon.svg" alt="">
+                </button>
             </div>
         </div>
         <div id="add_popup" class="popup">
             <div class="popup__inner">
-                <form method="post">
-
+                <form id="add-format-form" method="post">
                     <input type="text" class="base-input" name="name">
                     <input type="color" value="#FFFFFF" name="color">
                     <input type="submit" class="base-btn" value="Добавить">

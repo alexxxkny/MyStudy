@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.http import HttpResponse, JsonResponse
 from django.views import View
+from django.core.exceptions import *
 from django.views.generic import CreateView, TemplateView, ListView, DetailView, FormView
 from .forms import *
 import json
@@ -45,21 +46,41 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
             return HttpResponse(request)
 
 
-
 class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
     template_name = 'mystudy_app/schedule/schedule_settings.html'
     login_url = 'mystudy_app:login'
 
     def post(self, request, *args, **kwargs):
-        print(request.body)
-        query = json.loads(request.body)
-        print(query)
-        if query['action'] == 'delete':
-            format_id = query['id']
-            LessonFormat.objects.get(pk=format_id).delete()
-            return HttpResponse(request)
+        if 'form' in request.content_type:
+            new_name = request.POST['name']
+            format_id = request.POST['id']
+            LessonFormat.objects.filter(pk=format_id).update(name=new_name)
+            return HttpResponse()
         else:
-            return HttpResponse(request)
+            query = json.loads(request.body)
+            if 'action' not in query:
+                return HttpResponse(request)
+            if query['action'] == 'delete':
+                format_id = query['id']
+                LessonFormat.objects.get(pk=format_id).delete()
+                return HttpResponse(request)
+            elif query['action'] == 'add':
+                name = query['name']
+                color = query['color']
+                group = request.user.group
+                try:
+                    new_obj = LessonFormat.objects.create(name=name, color=color, group=group)
+                except:
+                    print('error')
+                else:
+                    return JsonResponse({'id': new_obj.pk})
+            elif query['action'] == 'change_color':
+                format_id = query['id']
+                new_color = query['color']
+                LessonFormat.objects.filter(pk=format_id).update(color=new_color)
+                return HttpResponse()
+            else:
+                return HttpResponse()
 
     def get(self, request, *args, **kwargs):
         context = {
