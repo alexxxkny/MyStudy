@@ -1,0 +1,37 @@
+{% load mystudy_tags %}
+
+<div class="schedule-table">
+    <div class="node node_top">
+        <p>Картинка?</p>
+    </div>
+    <div class="node node_top">
+        <p>Понедельник</p>
+    </div>
+    <div class="node node_top">
+        <p>Вторник</p>
+    </div>
+    <div class="node node_top">
+        <p>Среда</p>
+    </div>
+    <div class="node node_top">
+        <p>Четверг</p>
+    </div>
+    <div class="node node_top">
+        <p>Пятница</p>
+    </div>
+    <div class="node node_top">
+        <p>Суббота</p>
+    </div>
+    {% for i in times|length %}
+        <div class="node">
+            <p>Время</p>
+        </div>
+        {% for j in 6|times %}
+            <div class="node">
+                <p class="node__lesson">Предмет</p>
+                <p class="node__type">Вид занятия</p>
+                <p class="node__room">Аудитория</p>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>

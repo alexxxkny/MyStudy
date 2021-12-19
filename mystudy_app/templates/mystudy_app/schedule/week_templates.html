@@ -1,5 +1,101 @@
 {% extends 'mystudy_app/schedule/base_schedule.html' %}
+{% load static %}
+{% load mystudy_tags %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/week_templates.css'%}">
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/schedule.css' %}">
+{% endblock %}
 
 {% block content %}
-Templates
+<div class="narrow-content">
+    <div class="tab">
+        <div class="tab__headers">
+            {% for template in templates %}
+                <div class="tab__label" data-id="{{ template.pk }}" data-order="{{ template.order }}">
+                    <p>{{ template.name }}</p>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="tab__body">
+            <div class="tab__menu">
+                <label for="week-name">Название недели:</label>
+                <input id="week-name" type="text">
+                <label for="week-order">Порядковый номер:</label>
+                <select name="order" id="week-order">
+                    {% for i in templates|length|times %}
+                        <option value="{{ i|add:1 }}">{{ i|add:1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="table-container">
+                <div class="schedule-table">
+                    <div class="node node_top">
+                        <p>Картинка?</p>
+                    </div>
+                    <div class="node node_top">
+                        <p>Понедельник</p>
+                    </div>
+                    <div class="node node_top">
+                        <p>Вторник</p>
+                    </div>
+                    <div class="node node_top">
+                        <p>Среда</p>
+                    </div>
+                    <div class="node node_top">
+                        <p>Четверг</p>
+                    </div>
+                    <div class="node node_top">
+                        <p>Пятница</p>
+                    </div>
+                    <div class="node node_top">
+                        <p>Суббота</p>
+                    </div>
+                    {% for time in lesson_times %}
+                        <div class="node time" data-id="{{ time.pk }}">
+                            <p>{{ time.start }} - {{ time.end }}</p>
+                        </div>
+                        {% for j in 6|times %}
+                            <div class="node data" data-row="{{ time.order|add:-1 }}" data-column="{{ j }}">
+                                <p class="node__lesson">[{{ time.order|add:-1 }}][{{ j }}]</p>
+                                <p class="node__type">Вид занятия</p>
+                                <p class="node__room">Аудитория</p>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block popups %}
+
+<div id="edit-lesson-popup-bg" class="base-popup-background">
+    <div id="edit-lesson-popup" class="base-popup">
+        <div class="base-popup__inner">
+            <p class="edit-node-title">Шаблонное занятие</p>
+            <p id="week-info" class="edit-node-info"></p>
+            <p id="weekday-info" class="edit-node-info"></p>
+            <form id="edit-form" class="edit-node-form">
+                <label for="class-input" class="base-label">Предмет:</label>
+                <input id="class-input" type="text" name="class" placeholder="Управление проектами" class="base-input">
+                <label for="type-input" class="base-label">Вид занятия:</label>
+                <input id="type-input" type="text" name="type" placeholder="Практика" class="base-input">
+                <label for="room-input" class="base-label">Аудитория:</label>
+                <input id="room-input" type="text" name="room" placeholder="1234" class="base-input">
+                <label for="format-select" class="base-label">Формат:</label>
+                <select name="format" id="format-select" class="base-input">
+                    {% for format in formats %}
+                        <option value="{{ format.pk }}">{{ format.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Сохранить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+    <script type="text/javascript" src="{% static 'mystudy_app/js/week_templates.js' %}"></script>
+{% endblock %}
+{% block scripts %}
 {% endblock %}

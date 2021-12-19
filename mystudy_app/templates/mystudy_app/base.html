@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="{% static 'mystudy_app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/base.css' %}">
     <link rel="stylesheet" href="{% static 'mystudy_app/css/zero.css' %}">
     {% block links %}
 
@@ -62,7 +62,7 @@
     </div>
     <div class="header-nav auth">
         <div class="header-nav__block">
-            <a href="{% url 'mystudy_app:all_groups' %}">
+            <a href="{% url 'mystudy_app:profile' %}">
                 <img class="profile-icon" src="{% static 'mystudy_app/images/icons/nav/user.svg' %}" alt="">
             </a>
         </div>
@@ -86,12 +86,10 @@
         {% endblock %}
     </div>
 </div>
-
-{% block footer %}
+</div>
+{% block popups %}
 
 {% endblock %}
-
-</div>
 {% csrf_token %}
 <script src="{% static 'mystudy_app/js/base.js' %}"></script>
 {% block scripts %}

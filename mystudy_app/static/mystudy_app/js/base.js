@@ -20,3 +20,12 @@ async function post_form(url, form){
         body: form
     })
 }
+
+function is_error_response(response_data){
+    if(response_data['result'] === 'error'){
+        console.log(`Ошибка на стороне сервера.\n${response_data['data']['error_text']}`)
+        alert(`Ошибка на стороне сервера.\n${response_data['data']['error_text']}`)
+        return true
+    }
+    return false
+}

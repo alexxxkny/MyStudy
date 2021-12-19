@@ -11,9 +11,9 @@ urlpatterns = [
     path('schedule/settings', ScheduleSettingsPage.as_view(), name='schedule_settings'),
     path('schedule/templates', ScheduleTemplatesPage.as_view(), name='week_templates'),
 
-    path('todo/', index, name='todo'),
+    path('todo/', TasksView.as_view(), name='todo'),
 
-    path('files/', index, name='files'),
+    path('files/', FilesView.as_view(), name='files'),
 
     path('login/', LoginUserView.as_view(), name='login'),
     path('logout/', logout_user, name='logout'),
@@ -21,5 +21,6 @@ urlpatterns = [
     path('groups/registration/', RegisterGroupView.as_view(), name='group_registration'),
     path('groups/', AllGroupsView.as_view(), name='all_groups'),
     path('groups/<slug:group_slug>', GroupView.as_view(), name='group'),
+    path('profile/', ProfileView.as_view(), name='profile'),
     # path('groups/join', GroupView.as_view(), name='group'),
 ]

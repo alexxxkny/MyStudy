@@ -1,7 +1,15 @@
 /*
 
 */
-
+.schedule{
+    width: 85%;
+}
+.schedule-table{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: minmax(1fr, 250px);
+}
 .node{
     max-width: 180px;
     max-height: 90px;
@@ -14,6 +22,12 @@
     padding: 5px;
     border: 1px solid black;
 }
+.node.data{
+    cursor: pointer;
+}
+.node_top{
+    max-height: 45px;
+}
 .node__lesson{
     margin: 20px 0 6px 0;
     font-size: 20px;
@@ -25,4 +39,21 @@
 .node__room{
     font-size: 12px;
     align-self: flex-end;
+}
+
+.week-slider{
+    display: flex;
+    flex-direction:  row;
+
+    justify-content: center;
+    align-items: center;
+
+    margin: 15px 0;
+}
+.week-slider__btn{
+    cursor: pointer;
+}
+.week-slider__text{
+    font-size: 20px;
+    margin: 0 60px;
 }

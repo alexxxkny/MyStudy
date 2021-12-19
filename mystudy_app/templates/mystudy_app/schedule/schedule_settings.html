@@ -5,17 +5,52 @@
 {% block content %}
     <div class="narrow-content">
         <div class="schedule-week">
-            <label for="week_input" class="schedule-week__text">Первая неделя (с нее начнется заполнение календаря):</label>
-            <input id="week_input" type="week">
+            <label for="schedule_start_input" class="schedule-label">Дата начала семестра:</label>
+            <input id="schedule_start_input" type="date" value="{{ schedule_start }}">
+        </div>
+        <div class="lessons-time">
+            <div class="settings-title">
+                <p>Время занятий</p>
+            </div>
+            <div class="settings-info">
+                <p>Время начала и конца занятий в вашей шараге</p>
+            </div>
+            <div class="lessons-time__count">
+                <label for="lesson-count" class="schedule-label">Количество занятий по расписанию:</label>
+                <input id="lesson-count" type="number" value="{{ lessons_time|length }}" max="10" min="0">
+            </div>
+            <div id="times-table" class="lessons-time__table">
+                <div class="lessons-time__node lessons-time__node_header right-border">
+                    <p>№ п/п</p>
+                </div>
+                <div class="lessons-time__node lessons-time__node_header">
+                    <p>Начало</p>
+                </div>
+                <div class="lessons-time__node lessons-time__node_header left-border">
+                    <p>Конец</p>
+                </div>
+                {% for lesson_time in lessons_time %}
+                    <div class="lessons-time__node right-border" data-id="{{ lesson_time.pk }}">
+                    <p>{{ forloop.counter }}</p>
+                    </div>
+                    <div class="lessons-time__node">
+                        <input type="time" value="{{ lesson_time.start|time:"H:i" }}">
+                    </div>
+                    <div class="lessons-time__node left-border">
+                        <input type="time" value="{{ lesson_time.end|time:"H:i" }}">
+                    </div>
+                {% endfor %}
+
+            </div>
         </div>
         <div class="options-settings">
             <div class="options-settings__row">
 
                 <div class="options-settings__select">
-                    <div class="options-settings__title">
+                    <div class="settings-title">
                         <p>Форматы занятий</p>
                     </div>
-                    <div class="options-settings__info">
+                    <div class="settings-info">
                         <p>Очно? Дистанционно? Онлайн курс? Или как?</p>
                     </div>
                     <div class="options-settings__form">
@@ -71,7 +106,6 @@
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block scripts %}

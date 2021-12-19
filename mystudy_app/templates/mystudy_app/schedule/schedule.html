@@ -1,28 +1,56 @@
 {% extends 'mystudy_app/schedule/base_schedule.html' %}
 {% load static %}
+{% load mystudy_tags %}
 
 {% block content %}
-    <button id="btn">Click</button>
+    <div class="narrow-content">
+        <div id="week-slider" class="week-slider" data-week-start="{{ week_start|date:"c" }}"
+        data-week-end="{{ week_end|date:"c" }}">
+            <div id="left-arrow" class="week-slider__btn">
+                <img src="{% static 'mystudy_app/images/icons/left_arrow.svg' %}" alt="">
+            </div>
+            <div class="week-slider__text">{{ week_start|date:"d.m.Y" }} - {{ week_end|date:"d.m.Y"  }}</div>
+            <div id="right-arrow" class="week-slider__btn">
+                <img src="{% static 'mystudy_app/images/icons/right_arrow.svg' %}" alt="">
+            </div>
+        </div>
+        <div class="schedule">
+            <div class="schedule-table">
+                <div class="node node_top">
+                    <p>Картинка?</p>
+                </div>
+                <div class="node node_top">
+                    <p>Понедельник</p>
+                </div>
+                <div class="node node_top">
+                    <p>Вторник</p>
+                </div>
+                <div class="node node_top">
+                    <p>Среда</p>
+                </div>
+                <div class="node node_top">
+                    <p>Четверг</p>
+                </div>
+                <div class="node node_top">
+                    <p>Пятница</p>
+                </div>
+                <div class="node node_top">
+                    <p>Суббота</p>
+                </div>
+                {% for time in lesson_times %}
+                    <div class="node time" data-id="{{ time.pk }}">
+                        <p>{{ time.start }} - {{ time.end }}</p>
+                    </div>
+                    {% for j in 6|times %}
+                        <div class="node data" data-row="{{ time.order|add:-1 }}" data-column="{{ j }}">
+                            <p class="node__lesson">[{{ time.order|add:-1 }}][{{ j }}]</p>
+                            <p class="node__type">Вид занятия</p>
+                            <p class="node__room">Аудитория</p>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+    </div>
+    </div>
 {% endblock %}
 
-{% block scripts %}
-    <script>
-        //const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const btn = document.getElementById('btn')
-        btn.addEventListener('click', async (e) => {
-            let response = await fetch("#", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8',
-                    'X-CSRFToken': csrftoken
-                },
-                body: JSON.stringify({'action': 'send'})
-            })
-
-            if(response.ok){
-                let json_text = await response.json()
-                console.log(json_text['text'])
-            }
-        })
-    </script>
-{% endblock %}

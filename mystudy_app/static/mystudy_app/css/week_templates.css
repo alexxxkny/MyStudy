@@ -1,0 +1,94 @@
+.tab{
+    width: 100%;
+    height: 100%;
+    margin: 10px 0 0 0;
+
+    display: flex;
+    flex-direction: column;
+}
+.tab__headers{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+.tab__label{
+    padding: 4px 8px;
+    background-color: #F2F4FF;
+    cursor: pointer;
+}
+.tab__label_selected{
+    background-color: #E3E7FF;
+}
+.tab__label p{
+    font-size: 24px;
+}
+.tab__add-tab{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: yellow;
+
+    cursor: pointer;
+    padding: 0 3px;
+}
+.tab__add-tab p{
+    font-size: 30px;
+}
+.tab__body{
+    display: flex;
+    flex-direction: column;
+
+    flex: 1 1 auto;
+    padding: 10px;
+    border: 2px solid #E3E7FF;
+}
+.tab__menu{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    margin: 0 0 15px 0;
+}
+.tab__menu label{
+    font-size: 20px;
+    margin: 0 10px 0 0;
+}
+.tab__menu input{
+    font-size: 20px;
+    margin: 0 10px 0 0;
+    padding: 3px 5px;
+}
+.tab__menu select{
+    font-size: 20px;
+    margin: 0 10px 0 0;
+}
+
+.table-container{
+    width: 90%;
+    align-self: center;
+}
+
+.edit-node-title{
+    margin: 0 0 10px 0;
+    font-size: 20px;
+}
+.edit-node-info{
+    margin: 0 0 8px 0;
+    font-size: 20px;
+}
+.edit-node-form{
+    display: grid;
+    grid-template-columns: 3fr 7fr;
+    row-gap: 10px;
+}
+.edit-node-form input.base-btn{
+    grid-column: span 2;
+}
+.edit-node-form label.base-label{
+    margin: 0 20px 0 0;
+    justify-self: end;
+    align-self: center;
+}
+
+

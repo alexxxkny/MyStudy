@@ -5,7 +5,140 @@ let active_popup = null
 const add_row_buttons = document.querySelectorAll('div.options-settings__add-row>button')
 const formats_form = document.querySelector('.options-settings__form')
 let rows = document.getElementsByClassName('options-settings__option')
-let example_node = document.getElementById('example-node')
+const example_node = document.getElementById('example-node')
+const times_table = document.getElementById('times-table')
+
+
+const schedule_start_input = document.getElementById('schedule_start_input')
+schedule_start_input.addEventListener('change', async (e) => {
+    let date = schedule_start_input.value
+
+    let response = await post_json('#',{
+        'action': 'set_schedule_start',
+        'date': date
+    })
+
+    if(response.ok){
+        let response_data = await response.json()
+        is_error_response(response_data)
+    }
+})
+
+let time_inputs = document.querySelectorAll('input[type=time]')
+for(let item of time_inputs){
+    item.addEventListener('change', commitTimeChanging)
+}
+
+const times_counter = document.getElementById('lesson-count')
+let prev_times_count = parseInt(times_counter.value)
+times_counter.addEventListener('change', (e) => {
+    let actual_times_count = +times_counter.value
+    if(actual_times_count > times_counter.max){
+        actual_times_count = times_counter.max
+        times_counter.value = times_counter.max
+    }
+    else if (actual_times_count < times_counter.min){
+        actual_times_count = times_counter.min
+        times_counter.value = times_counter.min
+    }
+    if(actual_times_count > prev_times_count){
+        for(let i = prev_times_count + 1; i <= actual_times_count; ++i){
+            add_time_row(i)
+        }
+    }
+    else if(actual_times_count < prev_times_count){
+        for(let i = actual_times_count; i < prev_times_count; ++i){
+            delete_time_row()
+        }
+    }
+
+    prev_times_count = actual_times_count
+})
+function add_time_row(number) {
+    times_table.insertAdjacentHTML('beforeend', `
+        <div class="lessons-time__node right-border" data-id="none">
+        <p>${number}</p>
+        </div>
+        <div class="lessons-time__node">
+            <input type="time" value="">
+        </div>
+        <div class="lessons-time__node left-border">
+            <input type="time" value="">
+        </div>
+    `.replace(/>\s+</g,'><'))
+}
+async function delete_time_row() {
+    let to_delete = Array.from(times_table.children).slice(-3)
+    let time_id = to_delete[0].getAttribute('data-id')
+    await post_json('#', {
+        'action': 'delete_time',
+        'id': time_id
+    })
+    for(let row of to_delete){
+        row.remove()
+    }
+}
+const times_table_observer = new MutationObserver(async (mutations) => {
+    for(let mutation of mutations){
+        if(mutation.type === 'childList'){
+            if(mutation.addedNodes.length > 0){
+                for(let item of mutation.addedNodes){
+                    if(!(item instanceof HTMLElement)) continue
+                    let times = item.querySelectorAll('input[type=time]')
+                    for(let item of times){
+                        item.addEventListener('change', commitTimeChanging)
+                    }
+                }
+            }
+        }
+    }
+})
+times_table_observer.observe(times_table, {
+    childList: true,
+    attributes: true,
+    attributeOldValue: true
+})
+
+async function commitTimeChanging(e){
+    let first_block, first_input, second_input
+    console.log(e.currentTarget.parentElement.nextElementSibling)
+    if(e.currentTarget.parentElement.nextElementSibling){
+        first_input = e.currentTarget
+        second_input = first_input.parentElement.nextElementSibling.children[0]
+        first_block = first_input.parentElement.previousElementSibling
+    } else {
+        first_input = e.currentTarget.parentElement.previousElementSibling.children[0]
+        second_input = e.currentTarget
+        first_block = first_input.parentElement.previousElementSibling
+    }
+    if(second_input.value){
+        console.log('sending...')
+        let time_id = first_block.getAttribute('data-id')
+        if(time_id === 'none'){
+            let response = await post_json('#', {
+                'action': 'add_time',
+                'order': first_block.children[0].textContent,
+                'start': first_input.value,
+                'end': second_input.value
+            })
+            if(response.ok){
+                let response_data = await response.json()
+                first_block.setAttribute('data-id', response_data['id'])
+            }
+        } else {
+            let response = await post_json('#', {
+                'action': 'change_time',
+                'id': time_id,
+                'start': first_input.value,
+                'end': second_input.value
+            })
+            if(response.ok){
+                console.log('Successfully changed!')
+            }
+        }
+    }
+}
+
 
 function changeExampleColor(){
     const color = active_row.querySelector('input[type=color]').value
@@ -165,3 +298,5 @@ for (let row of rows){
     row.addEventListener('click', selectedRow);
     row.querySelector('.options-settings__edit').addEventListener('click', optionEditPopup);
 }
+
+

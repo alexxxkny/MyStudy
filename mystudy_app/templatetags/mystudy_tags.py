@@ -22,3 +22,8 @@ def get_login_menu():
         {'title': 'Войти', 'url_name': 'mystudy_app:login', 'authenticated': False},
         {'title': 'Выйти', 'url_name': 'mystudy_app:logout', 'authenticated': True},
     ]
+
+
+@register.filter(name='times')
+def times(number):
+    return range(number)
