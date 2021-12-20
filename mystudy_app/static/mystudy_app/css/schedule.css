@@ -57,3 +57,40 @@
     font-size: 20px;
     margin: 0 60px;
 }
+
+.edit-node-title{
+    margin: 0 0 10px 0;
+    font-size: 20px;
+}
+.edit-node-info{
+    margin: 0 0 8px 0;
+    font-size: 20px;
+}
+.edit-node-form{
+    display: grid;
+    grid-template-columns: 3fr 7fr;
+    row-gap: 10px;
+}
+.edit-node-form input.base-btn{
+    grid-column: span 2;
+}
+.edit-node-form label.base-label{
+    margin: 0 20px 0 0;
+    justify-self: end;
+    align-self: center;
+}
+.delete_btn {
+    position: absolute;
+    top: 30px;
+    right: 45px;
+    cursor: pointer;
+}
+.delete_btn img{
+    transform: scale(1.5);
+}
+
+.narrow-btn {
+    max-width: 150px;
+    height: auto;
+    padding: 10px 5px;
+}

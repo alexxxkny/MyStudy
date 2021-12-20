@@ -21,6 +21,64 @@ class MyJsonEncoder(JSONEncoder):
         return data_dict
 
 
+class ScheduleTableHandler:
+    @staticmethod
+    def make_template_table(request, data):
+        table = {'0': {}, '1': {}, '2': {}, '3': {}, '4': {}, '5': {}}
+        template_lessons = TemplateLesson.objects.filter(
+            week_template=data['template_id'],
+            week_template__group=request.user.group,
+        )
+        for template_lesson in template_lessons:
+            lesson = template_lesson.lesson
+            table[template_lesson.week_day][lesson.lesson_time.order - 1] = {
+                'id': template_lesson.pk,
+                'color': lesson.lesson_format.color,
+                'type': lesson.type,
+                'room': lesson.room,
+                'lesson': lesson.discipline,
+                'status': 'template'
+            }
+        return table
+
+    @staticmethod
+    def make_full_table(request, data):
+        current_date = datetime.datetime.strptime(data['week_start'], '%Y-%m-%d').date()
+        template_id = ScheduleTableHandler.get_template_id(request.user.group, current_date)
+        table = ScheduleTableHandler.make_template_table(request, {'template_id': template_id})
+
+        week_start = date.fromisoformat(data['week_start'])
+        week_end = date.fromisoformat(data['week_end'])
+        custom_lessons = Lesson.objects.filter(
+            group=request.user.group,
+            date__range=(week_start, week_end),
+            is_template=False
+        )
+        for lesson in custom_lessons:
+            table[str(date.weekday(lesson.date))][lesson.lesson_time.order - 1] = {
+                'id': lesson.pk,
+                'color': lesson.lesson_format.color,
+                'type': lesson.type,
+                'room': lesson.room,
+                'lesson': lesson.discipline,
+                'status': 'custom'
+            }
+        print(custom_lessons)
+        return table
+
+    @staticmethod
+    def get_template_id(group, start_date):
+        schedule_start_monday = group.schedule_start - timedelta(days=date.weekday(group.schedule_start))
+        weeks_delta = (start_date - schedule_start_monday).days // 7
+        week_template_order = (weeks_delta % 2) + 1
+        try:
+            template_id = WeekTemplate.objects.get(order=week_template_order, group=group).pk
+        except WeekTemplate.DoesNotExist as e:
+            raise Exception('Не удалось найти WeekTemplate')
+        else:
+            return template_id
+
+
 def json_error_response(text):
     return JsonResponse({
         'result': 'error',
@@ -92,18 +150,44 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        query = json.loads(request.body)
-        print(query)
-        if query['action'] == 'send':
-            return JsonResponse({'text': 'ITSWORKINMTHFCKR!!!'})
-        else:
-            return HttpResponse(request)
+        if 'json' in request.content_type:
+            query = json.loads(request.body)
+            action = query.get('action', False)
+            if action:
+                if action == 'previous_week':
+                    return self.previous_week(request, query['data'])
+                elif action == 'next_week':
+                    return self.next_week(request, query['data'])
+                elif action == 'get_table':
+                    return self.get_table(request, query['data'])
 
     @staticmethod
     def get_week_dates(current_date=date.today()):
         week_start = current_date - timedelta(days=date.weekday(current_date))
         week_end = current_date + timedelta(days=(6 - date.weekday(current_date)))
         return week_start, week_end
+
+    @staticmethod
+    def previous_week(request, data):
+        current_date = data['date']
+        week_start, week_end = SchedulePage.get_week_dates(date.fromisoformat(current_date) - timedelta(days=1))
+        data['week_start'] = week_start.isoformat()
+        data['week_end'] = week_end.isoformat()
+        return SchedulePage.get_table(request, data)
+
+    @staticmethod
+    def next_week(request, data):
+        current_date = datetime.datetime.strptime(data['date'], '%Y-%m-%d').date()
+        week_start, week_end = SchedulePage.get_week_dates(current_date + timedelta(days=1))
+        data['week_start'] = week_start.isoformat()
+        data['week_end'] = week_end.isoformat()
+        return SchedulePage.get_table(request, data)
+
+    @staticmethod
+    def get_table(request, data):
+        table = ScheduleTableHandler.make_full_table(request, data)
+        data['table'] = table
+        return json_success_response(data)
 
 
 class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
@@ -197,7 +281,7 @@ class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
         return render(request, ScheduleSettingsPage.template_name, context)
 
 
-class ScheduleTemplatesPage(LoginRequiredMixin, TemplateView):
+class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateView):
     template_name = 'mystudy_app/schedule/week_templates.html'
     login_url = 'mystudy_app:login'
 
@@ -221,11 +305,13 @@ class ScheduleTemplatesPage(LoginRequiredMixin, TemplateView):
                 elif action == 'change_template_order':
                     return self.change_template_order(request, query['data'])
                 elif action == 'get_table':
-                    return self.get_table(request, query['data'])
+                    return self.send_table(request, query['data'])
                 elif action == 'add_template_lesson':
                     return self.add_template_lesson(request, query['data'])
                 elif action == 'edit_template_lesson':
                     return self.edit_template_lesson(request, query['data'])
+                elif action == 'delete_template_lesson':
+                    return self.delete_template_lesson(request, query['data'])
 
     @staticmethod
     def change_template_name(request, data):
@@ -262,25 +348,8 @@ class ScheduleTemplatesPage(LoginRequiredMixin, TemplateView):
         else:
             return json_success_response()
 
-    @staticmethod
-    def get_table(request, data):
-        table = {'0': {}, '1': {}, '2': {}, '3': {}, '4': {}, '5': {}}
-        template_id = data['template_id']
-        print(template_id)
-        template_lessons = TemplateLesson.objects.filter(
-            week_template=template_id,
-            week_template__group=request.user.group,
-        )
-        for template_lesson in template_lessons:
-            lesson = template_lesson.lesson
-            table[template_lesson.week_day][lesson.lesson_time.order - 1] = {
-                'id': template_lesson.pk,
-                'color': lesson.lesson_format.color,
-                'type': lesson.type,
-                'room': lesson.room,
-                'lesson': lesson.discipline
-            }
-        print(table)
+    def send_table(self, request, data):
+        table = ScheduleTableHandler.make_template_table(request, data)
         return json_success_response({'table': table})
 
     @staticmethod
@@ -334,6 +403,19 @@ class ScheduleTemplatesPage(LoginRequiredMixin, TemplateView):
             return json_success_response({
                 'color': lesson_format.color
             })
+
+    @staticmethod
+    def delete_template_lesson(request, data):
+        try:
+            template_lesson = TemplateLesson.objects.get(pk=data['id'])
+            template_lesson.lesson.delete()
+            template_lesson.delete()
+        except TemplateLesson.DoesNotExist:
+            return json_error_response('Неверный TemplateLesson ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
 
 
 class TasksView(LoginRequiredMixin, TemplateView):

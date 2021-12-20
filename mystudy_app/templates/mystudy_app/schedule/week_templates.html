@@ -74,6 +74,9 @@
 <div id="edit-lesson-popup-bg" class="base-popup-background">
     <div id="edit-lesson-popup" class="base-popup">
         <div class="base-popup__inner">
+            <div id="delete-template" class="delete_btn">
+                <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
+            </div>
             <p class="edit-node-title">Шаблонное занятие</p>
             <p id="week-info" class="edit-node-info"></p>
             <p id="weekday-info" class="edit-node-info"></p>
@@ -95,7 +98,7 @@
         </div>
     </div>
 </div>
-    <script type="text/javascript" src="{% static 'mystudy_app/js/week_templates.js' %}"></script>
 {% endblock %}
 {% block scripts %}
+    <script type="module" src="{% static 'mystudy_app/js/week_templates.js' %}"></script>
 {% endblock %}

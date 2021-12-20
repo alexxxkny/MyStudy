@@ -43,14 +43,58 @@
                     </div>
                     {% for j in 6|times %}
                         <div class="node data" data-row="{{ time.order|add:-1 }}" data-column="{{ j }}">
-                            <p class="node__lesson">[{{ time.order|add:-1 }}][{{ j }}]</p>
-                            <p class="node__type">Вид занятия</p>
-                            <p class="node__room">Аудитория</p>
+                            <p class="node__lesson"></p>
+                            <p class="node__type"></p>
+                            <p class="node__room"></p>
                         </div>
                     {% endfor %}
                 {% endfor %}
             </div>
     </div>
     </div>
+    <div id="edit-lesson-popup-bg" class="base-popup-background">
+        <div id="edit-lesson-popup" class="base-popup">
+            <div class="base-popup__inner">
+                <div id="delete-lesson" class="delete_btn">
+                    <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
+                </div>
+                <p class="edit-node-title">Занятие</p>
+                <p id="week-info" class="edit-node-info"></p>
+                <p id="weekday-info" class="edit-node-info"></p>
+                <form id="edit-form" class="edit-node-form">
+                    <label for="class-input" class="base-label">Предмет:</label>
+                    <input id="class-input" type="text" name="class" placeholder="Управление проектами" class="base-input">
+                    <label for="type-input" class="base-label">Вид занятия:</label>
+                    <input id="type-input" type="text" name="type" placeholder="Практика" class="base-input">
+                    <label for="room-input" class="base-label">Аудитория:</label>
+                    <input id="room-input" type="text" name="room" placeholder="1234" class="base-input">
+                    <label for="format-select" class="base-label">Формат:</label>
+                    <select name="format" id="format-select" class="base-input">
+                        {% for format in formats %}
+                            <option value="{{ format.pk }}">{{ format.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="Сохранить" class="base-btn">
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="choose-action-popup-bg" class="base-popup-background">
+        <div id="choose-action-popup" class="base-popup">
+            <div class="base-popup__inner">
+                <p class="edit-node-title">Это шаблонное занятие</p>
+                <p id="week-info" class="edit-node-info">Выберите действие</p>
+                <div class="buttons-row">
+                    <button class="base-btn narrow-btn">Этой пары не будет</button>
+                    <button class="base-btn narrow-btn">Будет другая пара</button>
+                    <button class="base-btn narrow-btn">Изменить шаблон</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="module" src="{% static 'mystudy_app/js/schedule.js' %}"></script>
 {% endblock %}
 

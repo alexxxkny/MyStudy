@@ -1,27 +1,21 @@
 "use strict"
+import * as tableHandler from './schedule_table.js'
+import {clearNode} from "./schedule_table.js";
+import {active_popup, active_popup_bg, openPopup, closePopup, closeActivePopup} from './popup_handler.js'
 // init
 document.addEventListener('DOMContentLoaded', () => {
     // select the first tab
     selectTab(tabs[0])
 })
 
-const weekdays = {
-    0: 'Понедельник',
-    1: 'Вторник',
-    2: 'Среда',
-    3: 'Четверг',
-    4: 'Пятница',
-    5: 'Суббота',
-}
-
 // Popups
-let active_popup = null
-let active_popup_bg = null
 const edit_lesson_popup = document.getElementById('edit-lesson-popup')
 const edit_lesson_popup_bg = document.getElementById('edit-lesson-popup-bg')
 const week_info = document.getElementById('week-info')
 const weekday_info = document.getElementById('weekday-info')
+const delete_btn = document.getElementById('delete-template')
 edit_lesson_popup_bg.addEventListener('click', closePopup)
+delete_btn.addEventListener('click', deleteTemplateLesson)
 
 //Edit Form
 let edit_form = document.getElementById('edit-form')
@@ -74,11 +68,46 @@ for(let node of table_nodes_elements){
 }
 
 // Making a matrix of nodes like a table
-let table_nodes = []
-for(let i = 0; i < row_count; i++) {
-    table_nodes.push(table_nodes_elements.slice(i * column_count, i * column_count + column_count))
+let table_nodes = tableHandler.makeTableNodes(table_nodes_elements)
+
+
+async function selectTab(tab) {
+    // unselect current tab
+    if(selected_tab){
+        selected_tab.classList.remove('tab__label_selected')
+    }
+    // select new tab
+    selected_tab = tab
+    selected_tab.classList.add('tab__label_selected')
+    // fill fields
+    week_name.value = selected_tab.children[0].innerText
+    week_order.value = selected_tab.getAttribute('data-order')
+    const table = await getTable(selected_tab.getAttribute('data-id'))
+    clearTable()
+    tableHandler.fillTable(table, table_nodes)
 }
 
+// Table
+
+async function getTable(template_id) {
+    let response = await post_json('#', {
+        'action': 'get_table',
+        'data': {
+            'template_id': template_id
+        }
+    })
+    if(response.ok){
+        let response_data = await response.json()
+        let table = response_data['data']['table']
+        return table
+    }
+}
+
+function clearTable() {
+    tableHandler.clearTable(table_nodes_elements)
+}
+
+// Table Nodes
 
 function getFormData() {
     let form = new FormData(edit_form)
@@ -151,53 +180,30 @@ async function changeTemplateLesson(data) {
     }
 }
 
-function selectTab(tab) {
-    // unselect current tab
-    if(selected_tab){
-        selected_tab.classList.remove('tab__label_selected')
+async function deleteTemplateLesson() {
+    const template_id = selected_node.getAttribute('data-id')
+    if(!template_id) {
+        closeActivePopup()
+        return
     }
-    // select new tab
-    selected_tab = tab
-    selected_tab.classList.add('tab__label_selected')
-    // fill fields
-    week_name.value = selected_tab.children[0].innerText
-    week_order.value = selected_tab.getAttribute('data-order')
-    fillTable(selected_tab.getAttribute('data-id'))
-}
 
-function clearTable() {
-    for (let node of table_nodes_elements){
-        node.style.backgroundColor = 'white'
-        node.children[0].innerText = 'Предмет'
-        node.children[1].innerText = 'Вид занятия'
-        node.children[2].innerText = 'Аудитория'
-    }
-}
-
-async function fillTable(template_id) {
     let response = await post_json('#', {
-        'action': 'get_table',
+        'action': 'delete_template_lesson',
         'data': {
-            'template_id': template_id
+            'id': template_id
         }
     })
+
     if(response.ok){
-        clearTable()
-        let response_data = await response.json()
-        let table = response_data['data']['table']
-        for(let column of Object.keys(table)){
-            for(let row of Object.keys(table[column])){
-                let node = table_nodes[row][column]
-                let node_data = table[column][row]
-                node.setAttribute('data-id', node_data['id'])
-                node.querySelector('.node__lesson').innerText = node_data['lesson']
-                node.querySelector('.node__type').innerText = node_data['type']
-                node.querySelector('.node__room').innerText = node_data['room']
-                node.style.backgroundColor = '#' + table[column][row]['color']
-            }
-        }
+        const response_data = await response.json()
+        if(is_error_response(response_data)) return
+
+        clearNode(selected_node)
+        closeActivePopup()
     }
 }
+
+// Menu
 
 async function editWeekName() {
     const week_id = selected_tab.getAttribute('data-id')
@@ -246,29 +252,4 @@ async function editWeekOrder() {
             }
         }
     } else alert('Сервер не отвечает')
-}
-
-function openPopup(popup){
-    if(active_popup){
-        closePopup()
-    }
-
-    active_popup = popup
-    active_popup_bg = popup.parentElement
-    active_popup.classList.add('active')
-    active_popup_bg.classList.add('active')
-}
-
-function closeActivePopup(){
-    active_popup.classList.remove('active')
-    active_popup_bg.classList.remove('active')
-
-    active_popup = null
-    active_popup_bg = null
-}
-
-function closePopup(e){
-    if(e.target === active_popup_bg){
-        closeActivePopup()
-    }
 }

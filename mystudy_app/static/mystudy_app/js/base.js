@@ -1,5 +1,14 @@
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+const weekdays = {
+    0: 'Понедельник',
+    1: 'Вторник',
+    2: 'Среда',
+    3: 'Четверг',
+    4: 'Пятница',
+    5: 'Суббота',
+}
+
 async function post_json(url, data) {
     return await fetch(url, {
         method: 'POST',
