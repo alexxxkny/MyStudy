@@ -25,6 +25,14 @@
         </a>
     </div>
     <div class="header-nav__block">
+        <a href="{% url 'mystudy_app:disciplines' %}">
+            <div class="module-link">
+                <img class="" src="{% static 'mystudy_app/images/icons/nav/disciplines_icon.svg' %}" alt="">
+                <p>Предметы</p>
+            </div>
+        </a>
+    </div>
+    <div class="header-nav__block">
         <a href="{% url 'mystudy_app:schedule_settings' %}">
             <div class="module-link">
                 <img class="" src="{% static 'mystudy_app/images/icons/nav/settings_icon.svg' %}" alt="">

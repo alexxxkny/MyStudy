@@ -1,7 +1,8 @@
 "use strict"
 import * as tableHandler from './schedule_table.js'
-import {active_popup, active_popup_bg, openPopup, closePopup, closeActivePopup} from './popup_handler.js'
-import {clearNode} from "./schedule_table.js";
+import {active_popup, active_popup_bg, openPopup, closePopup, closeActivePopup,
+        getEditFromPopupData} from './popup_handler.js'
+import {clearNode, fillNode, flushNode, createStatusElement} from "./schedule_table.js";
 
 // init
 document.addEventListener('DOMContentLoaded', async e => {
@@ -12,19 +13,45 @@ document.addEventListener('DOMContentLoaded', async e => {
 })
 
 // Popups
+// Custom Edit Popup
 const edit_lesson_popup = document.getElementById('edit-lesson-popup')
 const edit_lesson_popup_bg = document.getElementById('edit-lesson-popup-bg')
 const week_info = document.getElementById('week-info')
 const weekday_info = document.getElementById('weekday-info')
 const delete_lesson_btn = document.getElementById('delete-lesson')
-edit_lesson_popup_bg.addEventListener('click', closeActivePopup)
+edit_lesson_popup_bg.addEventListener('click', closePopup)
 delete_lesson_btn.addEventListener('click', async e =>{
-    console.log('Типа удалил')
+    await deleteCustomLesson()
+    closeActivePopup()
 })
 
+// Choose Action Popup
 const choose_action_popup_bg = document.getElementById('choose-action-popup-bg')
 const choose_action_popup = document.getElementById('choose-action-popup')
-choose_action_popup_bg.addEventListener('click', closeActivePopup)
+const cancel_btn = document.getElementById('cancel-lesson-btn')
+const set_custom_btn = document.getElementById('set-custom-lesson-btn')
+const edit_template_btn = document.getElementById('edit-template-btn')
+choose_action_popup_bg.addEventListener('click', closePopup)
+
+cancel_btn.addEventListener('click', cancelLesson)
+set_custom_btn.addEventListener('click', () => {
+    //closeActivePopup()
+    openPopup(edit_lesson_popup)
+})
+edit_template_btn.addEventListener('click', () => {
+    window.location.href = 'http://127.0.0.1:8000/schedule/templates'
+})
+
+// Uncancel Template Lesson Popup
+const uncancel_lesson_popup_bg = document.getElementById('uncancel-lesson-popup-bg')
+const uncancel_lesson_popup = document.getElementById('uncancel-lesson-popup')
+const uncancel_btn = document.getElementById('uncancel-btn')
+uncancel_lesson_popup_bg.addEventListener('click', closePopup)
+uncancel_btn.addEventListener('click', async () => {
+    await deleteCustomLesson()
+    selected_node.setAttribute('data-status', 'template')
+    closeActivePopup()
+})
 
 // Table
 let selected_node = null
@@ -39,18 +66,21 @@ for(let node of table_nodes_elements){
         const lesson_time = document.querySelectorAll('.node.time')[lesson_order].children[0].innerText
         const weekday = weekdays[weekday_number]
         // getting lesson date
-        const week_start = week_slider.getAttribute('data-week-start')
-        let current_date = new Date(Date.parse(week_start))
-        current_date.setDate(current_date.getDate() + Number(weekday_number))
+        const current_date = getNodeDate(weekday_number)
         // customizing popup
         week_info.innerText = current_date.toLocaleDateString()
         weekday_info.innerText = `${weekday}, ${lesson_time}`
 
         const status = selected_node.getAttribute('data-status')
+        console.log(status)
+        console.log(!status)
         if(status === 'template'){
             openPopup(choose_action_popup)
         }
-        else if(status === 'custom'){
+        else if(status === 'custom-canceled'){
+            openPopup(uncancel_lesson_popup)
+        }
+        else if(!status || status === 'custom'){
             openPopup(edit_lesson_popup)
         }
     })
@@ -144,13 +174,17 @@ let edit_form = document.getElementById('edit-form')
 edit_form.addEventListener('submit', async (e) => {
     e.preventDefault()
 
-    let data = getFormData()
-    let lesson_id = selected_node.getAttribute('data-id')
-    if(lesson_id){
+    let data = getEditFromPopupData(edit_form)
+    const lesson_id = selected_node.getAttribute('data-id')
+    const status = selected_node.getAttribute('data-status')
+    console.log(`id=${lesson_id}, status=${status}`)
+    if(lesson_id && status === 'custom') {
         data['id'] = lesson_id
-        await changeLesson(data)
-    } else {
-        await addLesson(data)
+        await changeCustomLesson(data)
+    }
+    else if(!(lesson_id) || (lesson_id && status === 'template')) {
+        console.log('here')
+        await addCustomLesson(data)
     }
 
     closeActivePopup()
@@ -158,95 +192,102 @@ edit_form.addEventListener('submit', async (e) => {
 
 // Table Nodes
 
-function getFormData() {
-    let form = new FormData(edit_form)
-    const discipline = form.get('class')
-    const type = form.get('type')
-    const room = form.get('room')
-    const format_id = form.get('format')
+function getNodeDate(weekday_number) {
+    const week_start = week_slider.getAttribute('data-week-start')
+    let current_date = new Date(Date.parse(week_start))
+    current_date.setDate(current_date.getDate() + Number(weekday_number))
 
-    if(discipline === ''){
-        alert('"Предмет" - обязательное поле')
-        closeActivePopup()
-        return
-    }
-
-    let data = {
-        'discipline': discipline,
-        'type': type,
-        'room': room,
-        'format_id': format_id,
-    }
-
-    return data
+    return current_date
 }
 
-async function addLesson(data) {
-    // Adding needed information
-    const time_order = selected_node.getAttribute('data-row')
-    const time_id = document.querySelectorAll('.node.time')[time_order].getAttribute('data-id')
-
-    data['weekday'] = selected_node.getAttribute('data-column')
-    data['time_id'] = time_id
-
-    let response = await post_json('#', {
-        'action': 'add_lesson',
-        'data': data
-    })
-
-    if(response.ok){
-        let response_data = await response.json()
-        if(is_error_response(response_data)) return
-
-        let lesson_id = response_data['data']['id']
-        let color = '#' + response_data['data']['color']
-        selected_node.setAttribute('data-id', lesson_id)
-        selected_node.children[0].innerText = data['discipline']
-        selected_node.children[1].innerText = data['type']
-        selected_node.children[2].innerText = data['room']
-        selected_node.style.backgroundColor = color
-    } else alert('Сервер не отвечает')
-}
-
-async function changeLesson(data) {
-    // Adding additional information
-    data['template_id'] = selected_node.getAttribute('data-id')
-
-    let response = await post_json('#', {
-        'action': 'edit_template_lesson',
-        'data': data
-    })
-
-    if(response.ok){
-        let response_data = await response.json()
-        if(is_error_response(response_data)) return
-
-        selected_node.querySelector('.node__lesson').innerText = data['discipline']
-        selected_node.querySelector('.node__type').innerText = data['type']
-        selected_node.querySelector('.node__room').innerText = data['room']
-        selected_node.style.backgroundColor = '#' + response_data['data']['color']
-    }
-}
-
-async function deleteLesson() {
+async function cancelLesson() {
     const template_id = selected_node.getAttribute('data-id')
-    if(!template_id) {
-        closeActivePopup()
-        return
-    }
+    const current_date = getNodeDate(selected_node.getAttribute('data-column'))
 
     let response = await post_json('#', {
-        'action': 'delete_template_lesson',
+        'action': 'cancel_template_lesson',
         'data': {
-            'id': template_id
+            'template_id': template_id,
+            'current_date': current_date.toISOString().substring(0,10)
         }
     })
 
     if(response.ok){
-        const response_data = await response.json()
-        if(is_error_response(response_data)) return
+        let response_json = await response.json()
+        if(is_error_response(response_json)) return
 
-        clearNode(selected_node)
+        selected_node.setAttribute('data-id', response_json['data']['id'])
+        selected_node.setAttribute('data-status', response_json['data']['status'])
+
+        const status_block = createStatusElement('Отменена')
+        selected_node.insertAdjacentElement('afterbegin', status_block)
         closeActivePopup()
+    }
+}
+
+async function addCustomLesson(data) {
+    const current_date = getNodeDate(selected_node.getAttribute('data-column'))
+    const time_order = selected_node.getAttribute('data-row')
+    const time_id = document.querySelectorAll('.node.time')[time_order].getAttribute('data-id')
+
+    data['current_date'] = current_date.toISOString().substring(0, 10)
+    data['time_id'] = time_id
+
+    let response = await post_json('#', {
+        'action': 'add_custom_lesson',
+        'data': data
+    })
+
+    if(response.ok){
+        let response_json = await response.json()
+        if(is_error_response(response_json)) return
+
+        let response_data = response_json['data']
+        selected_node.setAttribute('data-id', response_data['id'])
+        selected_node.setAttribute('data-status', response_data['status'])
+        fillNode(selected_node, {
+            'discipline': data['discipline'],
+            'room': data['room'],
+            'type': data['type'],
+            'color': response_data['color'],
+        })
+    } else alert('Сервер не отвечает')
+}
+
+async function changeCustomLesson(data) {
+    let response = await post_json('#', {
+        'action': 'change_custom_lesson',
+        'data': data
+    })
+
+    if(response.ok) {
+        let response_json = await response.json()
+        if(is_error_response(response_json)) return
+
+        data['color'] = response_json['data']['color']
+        fillNode(selected_node, data)
+        closeActivePopup()
+    }
+}
+
+async function deleteCustomLesson() {
+    const lesson_id = selected_node.getAttribute('data-id')
+
+    let response = await post_json('#', {
+        'action': 'delete_custom_lesson',
+        'data': {
+            'id': lesson_id
+        }
+    })
+
+    if(response.ok){
+        const response_json = await response.json()
+        if(is_error_response(response_json)) return
+
+        if(selected_node.getAttribute('data-status') === 'custom-canceled'){
+            selected_node.children[0].remove()
+        } else {
+            clearNode(selected_node)
+        }
     }
 }

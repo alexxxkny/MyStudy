@@ -1,7 +1,14 @@
 "use strict"
 import * as tableHandler from './schedule_table.js'
 import {clearNode} from "./schedule_table.js";
-import {active_popup, active_popup_bg, openPopup, closePopup, closeActivePopup} from './popup_handler.js'
+import {
+    active_popup,
+    active_popup_bg,
+    openPopup,
+    closePopup,
+    closeActivePopup,
+    getEditFromPopupData
+} from './popup_handler.js'
 // init
 document.addEventListener('DOMContentLoaded', () => {
     // select the first tab
@@ -22,7 +29,7 @@ let edit_form = document.getElementById('edit-form')
 edit_form.addEventListener('submit', async (e) => {
     e.preventDefault()
 
-    let data = getFormData()
+    let data = getEditFromPopupData(edit_form)
     let lesson_id = selected_node.getAttribute('data-id')
     if(lesson_id){
         data['id'] = lesson_id
@@ -83,7 +90,7 @@ async function selectTab(tab) {
     week_name.value = selected_tab.children[0].innerText
     week_order.value = selected_tab.getAttribute('data-order')
     const table = await getTable(selected_tab.getAttribute('data-id'))
-    clearTable()
+    flushTable()
     tableHandler.fillTable(table, table_nodes)
 }
 
@@ -103,34 +110,11 @@ async function getTable(template_id) {
     }
 }
 
-function clearTable() {
-    tableHandler.clearTable(table_nodes_elements)
+function flushTable() {
+    tableHandler.flushTable(table_nodes_elements)
 }
 
 // Table Nodes
-
-function getFormData() {
-    let form = new FormData(edit_form)
-    const discipline = form.get('class')
-    const type = form.get('type')
-    const room = form.get('room')
-    const format_id = form.get('format')
-
-    if(discipline === ''){
-        alert('"Предмет" - обязательное поле')
-        closeActivePopup()
-        return
-    }
-
-    let data = {
-        'discipline': discipline,
-        'type': type,
-        'room': room,
-        'format_id': format_id,
-    }
-
-    return data
-}
 
 async function addTemplateLesson(data) {
     // Adding needed information

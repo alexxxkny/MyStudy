@@ -1,5 +1,6 @@
 import datetime
 
+import data as data
 from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -10,8 +11,7 @@ from django.views.generic import CreateView, TemplateView, ListView, DetailView
 from .forms import *
 from datetime import time, date, timedelta
 from json import JSONEncoder
-import json
-import traceback
+import json, copy, traceback
 
 
 class MyJsonEncoder(JSONEncoder):
@@ -52,7 +52,7 @@ class ScheduleTableHandler:
         custom_lessons = Lesson.objects.filter(
             group=request.user.group,
             date__range=(week_start, week_end),
-            is_template=False
+            status__istartswith='custom'
         )
         for lesson in custom_lessons:
             table[str(date.weekday(lesson.date))][lesson.lesson_time.order - 1] = {
@@ -61,8 +61,8 @@ class ScheduleTableHandler:
                 'type': lesson.type,
                 'room': lesson.room,
                 'lesson': lesson.discipline,
-                'status': 'custom'
-            }
+                'status': lesson.status
+        }
         print(custom_lessons)
         return table
 
@@ -160,6 +160,14 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
                     return self.next_week(request, query['data'])
                 elif action == 'get_table':
                     return self.get_table(request, query['data'])
+                elif action == 'cancel_template_lesson':
+                    return self.cancel_template_lesson(request, query['data'])
+                elif action == 'add_custom_lesson':
+                    return self.add_custom_lesson(request, query['data'])
+                elif action == 'delete_custom_lesson':
+                    return self.delete_custom_lesson(request, query['data'])
+                elif action == 'change_custom_lesson':
+                    return self.change_custom_lesson(request, query['data'])
 
     @staticmethod
     def get_week_dates(current_date=date.today()):
@@ -188,6 +196,84 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
         table = ScheduleTableHandler.make_full_table(request, data)
         data['table'] = table
         return json_success_response(data)
+
+    @staticmethod
+    def cancel_template_lesson(request, data):
+        template_id = data['template_id']
+        current_date = data['current_date']
+        try:
+            template_lesson = TemplateLesson.objects.get(pk=template_id)
+            canceled_lesson = Lesson.objects.create(
+                status='custom-canceled',
+                discipline=template_lesson.lesson.discipline,
+                group=request.user.group,
+                lesson_time=template_lesson.lesson.lesson_time,
+                date=date.fromisoformat(current_date),
+                lesson_format=template_lesson.lesson.lesson_format,
+                type=template_lesson.lesson.type,
+                room=template_lesson.lesson.room,
+            )
+        except TemplateLesson.DoesNotExist:
+            return json_error_response('Неверный TemplateLesson ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'id': canceled_lesson.pk,
+                'status': canceled_lesson.status,
+            })
+
+    @staticmethod
+    def add_custom_lesson(request, data):
+        try:
+            lesson_format = LessonFormat.objects.get(pk=int(data['format_id']))
+            new_lesson = Lesson.objects.create(
+                date=date.fromisoformat(data['current_date']),
+                group=request.user.group,
+                lesson_time=LessonTime.objects.get(pk=int(data['time_id'])),
+                lesson_format=lesson_format,
+                type=data['type'],
+                room=data['room'],
+                discipline=data['discipline'],
+                status='custom',
+            )
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'id': new_lesson.pk,
+                'color': lesson_format.color,
+                'status': 'custom'
+            })
+
+    @staticmethod
+    def delete_custom_lesson(request, data):
+        try:
+            Lesson.objects.get(pk=data['id']).delete()
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def change_custom_lesson(request, data):
+        try:
+            lesson = Lesson.objects.get(pk=data['id'])
+            lesson.discipline = data['discipline']
+            lesson.type = data['type']
+            lesson.room = data['room']
+            lesson.lesson_format = LessonFormat.objects.get(pk=int(data['format_id']))
+            lesson.save()
+        except Lesson.DoesNotExist:
+            return json_error_response('Неверный Lesson ID')
+        except LessonFormat.DoesNotExist:
+            return json_error_response('Неверный LessonFormat ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'color': lesson.lesson_format.color,
+            })
 
 
 class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
@@ -274,6 +360,7 @@ class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
         if request.user.group is None:
             return redirect('mystudy_app:all_groups')
         context = {
+            'lessons': Discipline.objects.filter(group=request.user.group),
             'schedule_start': date.isoformat(request.user.group.schedule_start),
             'formats': LessonFormat.objects.filter(group=request.user.group),
             'lessons_time': LessonTime.objects.filter(group=request.user.group),
@@ -360,11 +447,11 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
             new_lesson = Lesson.objects.create(
                 group=request.user.group,
                 lesson_time=LessonTime.objects.get(pk=int(data['time_id'])),
-                lesson_format= lesson_format,
+                lesson_format=lesson_format,
                 type=data['type'],
                 room=data['room'],
                 discipline=data['discipline'],
-                is_template=True
+                status='template'
             )
             new_template_lesson = TemplateLesson.objects.create(
                 week_day=data['weekday'],
@@ -416,6 +503,69 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
             return json_error_response(e)
         else:
             return json_success_response()
+
+
+class DisciplinesPage(LoginRequiredMixin, TemplateView):
+    template_name = 'mystudy_app/schedule/disciplines.html'
+    login_url = 'mystudy_app:login'
+
+    def get(self, request, *args, **kwargs):
+        context = {
+            'lessons': Discipline.objects.filter(group=request.user.group)
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        if 'json' in request.content_type:
+            query = json.loads(request.body)
+            if 'action' in query:
+                action = query['action']
+                if action == 'add_discipline':
+                    return self.add_discipline(request, query['data'])
+                elif action == 'edit_discipline':
+                    return self.edit_discipline(request, query['data'])
+                elif action == 'delete_discipline':
+                    return self.delete_discipline(request, query['data'])
+
+    @staticmethod
+    def delete_discipline(request, data):
+        try:
+            Discipline.objects.get(pk=data['id']).delete()
+        except Discipline.DoesNotExist:
+            return json_error_response('Неверный Discipline ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def edit_discipline(request, data):
+        try:
+            discipline = Discipline.objects.get(pk=int(data['id']))
+            discipline.name = data['name']
+            discipline.short_name = data['short_name']
+            discipline.save()
+        except Discipline.DoesNotExist:
+            return json_error_response('Неверный Discipline ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def add_discipline(request, data):
+        try:
+            new_discipline = Discipline.objects.create(
+                name=data['name'],
+                short_name=data['short_name'],
+                group=request.user.group
+            )
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'id': new_discipline.pk
+            })
 
 
 class TasksView(LoginRequiredMixin, TemplateView):

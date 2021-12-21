@@ -85,10 +85,19 @@
                 <p class="edit-node-title">Это шаблонное занятие</p>
                 <p id="week-info" class="edit-node-info">Выберите действие</p>
                 <div class="buttons-row">
-                    <button class="base-btn narrow-btn">Этой пары не будет</button>
-                    <button class="base-btn narrow-btn">Будет другая пара</button>
-                    <button class="base-btn narrow-btn">Изменить шаблон</button>
+                    <button id="cancel-lesson-btn" class="base-btn narrow-btn">Этой пары не будет</button>
+                    <button id="set-custom-lesson-btn" class="base-btn narrow-btn">Будет другая пара</button>
+                    <button id="edit-template-btn" class="base-btn narrow-btn">Изменить шаблон</button>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div id="uncancel-lesson-popup-bg" class="base-popup-background">
+        <div id="uncancel-lesson-popup" class="base-popup">
+            <div class="base-popup__inner">
+                <p class="edit-node-title">Это занятие было отменено</p>
+                <p id="week-info" class="edit-node-info">Выберите действие</p>
+                <button id="uncancel-btn" class="base-btn">Все-таки будет</button>
             </div>
         </div>
     </div>

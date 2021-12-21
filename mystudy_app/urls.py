@@ -10,6 +10,7 @@ urlpatterns = [
     path('schedule/', SchedulePage.as_view(), name='schedule'),
     path('schedule/settings', ScheduleSettingsPage.as_view(), name='schedule_settings'),
     path('schedule/templates', ScheduleTemplatesPage.as_view(), name='week_templates'),
+    path('schedule/disciplines', DisciplinesPage.as_view(), name='disciplines'),
 
     path('todo/', TasksView.as_view(), name='todo'),
 

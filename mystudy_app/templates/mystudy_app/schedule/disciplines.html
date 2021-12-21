@@ -1,0 +1,88 @@
+{% extends 'mystudy_app/schedule/base_schedule.html'%}
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/disciplines.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="narrow-content">
+    <div class="disciplines-title">
+        <p>Дисциплины</p>
+    </div>
+    <div class="disciplines-info">
+        <p>Какие предметы есть в текущем расписании?</p>
+    </div>
+    <div class="disciplines-form">
+        <div class="disciplines-list">
+            {% for lesson in lessons %}
+                <div class="disciplines-list__row" data-id="{{ lesson.pk }}">
+                    <div class="disciplines-list__number">
+                        <p>
+                            {{ forloop.counter }}
+                        </p>
+                    </div>
+                    <div class="disciplines-list__name">
+                        <p>
+                            {{ lesson.name }}
+                        </p>
+                    </div>
+                    <div class="disciplines-list__short-name">
+                        <p>
+                            {{ lesson.short_name }}
+                        </p>
+                    </div>
+                    <div class="disciplines-list__edit">
+                        <img src="{% static 'mystudy_app/images/icons/dots_icon.svg'%}" alt="">
+                    </div>
+                </div>
+            {% endfor %}
+            <div id="add-btn" class="disciplines-list__add-row">
+                <p>Добавить</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block popups %}
+<div id="add-discipline-popup-bg" class="base-popup-background">
+    <div id="add-discipline-popup" class="base-popup">
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Добавить предмет</p>
+            </div>
+            <form id="add-discipline-form" class="discipline-form">
+                <label for="add-discipline-name" class="base-label">Полное название:</label>
+                <input id="add-discipline-name" name="name" type="text" class="base-input" placeholder="Не сокращайте">
+                <label for="add-discipline-short-name" class="base-label">Короткое название:</label>
+                <input id="add-discipline-short-name" name="short_name" type="text" class="base-input" placeholder="Не больше 10 символов">
+                <input id="adding-submit-btn" type="submit" value="Добавить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+<div id="edit-discipline-popup-bg" class="base-popup-background">
+    <div id="edit-discipline-popup" class="base-popup">
+        <div class="base-popup__inner relative">
+            <div id="popup-delete-btn" class="popup-delete-btn">
+                <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
+            </div>
+            <div class="base-popup__title">
+                <p>Изменить предмет</p>
+            </div>
+            <form id="edit-discipline-form" class="discipline-form">
+                <label for="edit-discipline-name" class="base-label">Полное название:</label>
+                <input id="edit-discipline-name" name="name" type="text" class="base-input" placeholder="Не сокращайте">
+                <label for="edit-discipline-short-name" class="base-label">Короткое название:</label>
+                <input id="edit-discipline-short-name" name="short_name" type="text" class="base-input" placeholder="Не больше 10 символов">
+                <input id="editing-submit-btn" type="submit" value="Сохранить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="module" src="{% static 'mystudy_app/js/disciplines.js'%}"></script>
+{% endblock %}

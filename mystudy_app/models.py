@@ -64,7 +64,7 @@ class Lesson(models.Model):
     type = models.CharField(max_length=100, blank=True, null=True)
     room = models.CharField(max_length=100, blank=True, null=True)
     discipline = models.CharField(max_length=100)
-    is_template = models.BooleanField(default=False)
+    status = models.CharField(max_length=100)
 
     def __str__(self):
         return f'Lesson(id={self.id})'
@@ -78,3 +78,13 @@ class LessonFormat(models.Model):
 
     def __str__(self):
         return f'LessonFormat(name={self.name}, color={self.color}, group={self.group})'
+
+
+class Discipline(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name='ID')
+    name = models.CharField(max_length=50)
+    short_name = models.CharField(max_length=10)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Discipline(id={self.id}, name={self.name}, short_name={self.short_name}, group={self.group})'

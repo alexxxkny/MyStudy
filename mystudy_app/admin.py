@@ -31,9 +31,14 @@ class WeekTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('id', 'date', 'group', 'lesson_time', 'lesson_format')
+    list_display = ('id', 'status', 'date', 'group', 'lesson_time', 'lesson_format')
 
 
 @admin.register(TemplateLesson)
 class TemplateLessonAdmin(admin.ModelAdmin):
     list_display = ('id', 'week_day', 'week_template', 'lesson')
+
+
+@admin.register(Discipline)
+class DisciplineAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'short_name', 'group')
