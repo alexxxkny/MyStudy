@@ -41,4 +41,9 @@ class TemplateLessonAdmin(admin.ModelAdmin):
 
 @admin.register(Discipline)
 class DisciplineAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'short_name', 'group')
+    list_display = ('id', 'name', 'short_name', 'group', 'label_color',)
+
+
+@admin.register(TaskLabel)
+class TaskLabelAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'color',)

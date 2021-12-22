@@ -1,6 +1,6 @@
 "use strict"
 import * as popup from "./popup_handler.js";
-import {closeActivePopup, openPopup} from "./popup_handler.js";
+import {closeActivePopup, openPopup, getFormData} from "./popup_handler.js";
 
 // List
 let selected_row = null
@@ -65,6 +65,7 @@ function getFormData(form) {
 
 async function addDiscipline() {
     let form_data = getFormData(add_discipline_form)
+    if(!validateFormData(form_data)) return
 
     let response = await post_json('#', {
         'action': 'add_discipline',
@@ -81,12 +82,14 @@ async function addDiscipline() {
         disciplines_list.lastElementChild.insertAdjacentElement('beforebegin', new_row)
         rearrangeNumbers()
         closeActivePopup()
+        clearAddForm()
     } else alert('Сервер не отвечает')
 }
 
 async function editDiscipline() {
     const discipline_id = selected_row.getAttribute('data-id')
     let form_data = getFormData(edit_discipline_form)
+    if(!validateFormData(form_data)) return
 
     form_data['id'] = discipline_id
 
@@ -175,6 +178,24 @@ function createRow() {
     row.insertAdjacentElement('beforeend', edit)
 
     return row
+}
+
+function validateFormData(data) {
+    if(data['short_name'].length > 10 || data['short_name'] === '') {
+        alert('Сокращенное название должно содержать от 1 до 10 символов')
+        return false
+    }
+    if(data['name'].length > 100 || data['name'] === '') {
+        alert('Полное название должно содержать от 1 до 100 символов')
+        return false
+    }
+    return true
+}
+
+function clearAddForm() {
+    document.querySelectorAll('#add-discipline-form input[type=text]').forEach(item => {
+        item.value = ''
+    })
 }
 
 // Mutation Observers

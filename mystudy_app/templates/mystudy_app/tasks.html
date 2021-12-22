@@ -1,5 +1,153 @@
 {% extends 'mystudy_app/base.html' %}
+{% load static %}
 
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/tasks.css' %}">
+{% endblock %}
+
+{% block sidebar %}
+<div class="filters-sidebar">
+    <div class="filters-sidebar__title">
+        <p>Фильтры</p>
+    </div>
+    <div class="filters-sidebar__filters-list">
+        <div class="filters-sidebar__filter">
+            <p>Все</p>
+        </div>
+        <div class="filters-sidebar__filter">
+            <p>Общие</p>
+        </div>
+        <div class="filters-sidebar__filter">
+            <p>Сегодня</p>
+        </div>
+    </div>
+    <div class="sidebar-list">
+        <div id="disciplines-dropdown-toggle" class="sidebar-list__header">
+            <div class="sidebar-list__title">
+                <p>Предметы</p>
+            </div>
+            <div class="sidebar-list__buttons">
+                <div id="toggle-arrow" class="sidebar-list__arrow">
+                    <img src="{% static 'mystudy_app/images/icons/dropdown_arrow.svg' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div id="disciplines-dropdown" class="sidebar-list__items">
+            {% for discipline in disciplines %}
+                <div class="sidebar-list__item" data-id="{{ discipline.pk }}">
+                    <div class="sidebar-list__marker">
+                        <div class="disciplines-marker" style="background-color:{{ discipline.label_color }};"></div>
+                    </div>
+                    <div class="sidebar-list__name">{{ discipline.short_name }}</div>
+                    <div id="edit-task-label-btn" class="sidebar-list__edit">
+                        <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="sidebar-list">
+        <div id="labels-dropdown-toggle" class="sidebar-list__header">
+            <div class="sidebar-list__title">
+                <p>Метки</p>
+            </div>
+            <div class="sidebar-list__buttons">
+                <div id="toggle-arrow" class="sidebar-list__arrow">
+                    <img src="{% static 'mystudy_app/images/icons/dropdown_arrow.svg' %}" alt="">
+                </div>
+                <div id="add-label-btn" class="sidebar-list__add">
+                    <img src="{% static 'mystudy_app/images/icons/dropdown_plus.svg' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div id="labels-dropdown" class="sidebar-list__items">
+            {% for label in labels %}
+                <div class="sidebar-list__item" data-id="{{ label.pk }}">
+                    <div class="sidebar-list__marker">
+                        <div class="labels-marker" style="background-color:{{ label.color }}"></div>
+                    </div>
+                    <div class="sidebar-list__name">{{ label.name }}</div>
+                    <div id="edit-custom-label-btn" class="sidebar-list__edit">
+                        <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
 {% block content %}
     Задачи
+{% endblock %}
+
+{% block popups %}
+<div id="add-label-popup-bg" class="base-popup-background">
+    <div id="add-label-popup" class="base-popup">
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Добавить метку</p>
+            </div>
+            <form id="add-label-form" class="base-popup__form">
+                <label for="name-input" class="base-label">Имя метки:</label>
+                <input id="name-input" type="text" name="name" placeholder="Личное" class="base-input">
+                <label for="color-input" class="base-label">Цвет:</label>
+                <input id="color-input" type="color" name="color" class="base-color-input">
+                <input type="submit" value="Добавить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+    <div id="edit-label-popup-bg" class="base-popup-background">
+    <div id="edit-label-popup" class="base-popup">
+        <div id="delete-label-btn" class="base-popup__delete-btn">
+            <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
+        </div>
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Изменить метку</p>
+            </div>
+            <form id="edit-label-form" class="base-popup__form">
+                <label for="name-input" class="base-label">Имя метки:</label>
+                <input id="name-input" type="text" name="name" placeholder="Личное" class="base-input">
+                <label for="color-input" class="base-label">Цвет:</label>
+                <input id="color-input" type="color" name="color" class="base-color-input">
+                <input type="submit" value="Сохранить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+<div id="edit-discipline-popup-bg" class="base-popup-background">
+    <div id="edit-discipline-popup" class="base-popup">
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Изменить цвет</p>
+            </div>
+            <form id="edit-discipline-form" class="base-popup__form">
+                <label for="color-input" class="base-label">Цвет:</label>
+                <input id="color-input" type="color" name="color" class="base-color-input">
+                <input type="submit" value="Добавить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block templates %}
+<template id="custom-label-item-template">
+<div class="sidebar-list__item" data-id="">
+    <div class="sidebar-list__marker">
+        <div class="labels-marker"></div>
+    </div>
+    <div class="sidebar-list__name"></div>
+    <div id="edit-custom-label-btn" class="sidebar-list__edit">
+        <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+    </div>
+</div>
+</template>
+{% endblock %}
+
+
+{% block scripts %}
+    <script type="module" src="{% static 'mystudy_app/js/tasks.js' %}"></script>
 {% endblock %}

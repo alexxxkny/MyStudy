@@ -75,11 +75,9 @@
 </div>
 {% endblock %}
 <div class="main">
-    <div class="sidebar">
-        {% block sidebar %}
-        
-        {% endblock %}
-    </div>
+    {% block sidebar %}
+
+    {% endblock %}
     <div class="content">
         {% block content %}
 
@@ -88,6 +86,9 @@
 </div>
 </div>
 {% block popups %}
+
+{% endblock %}
+{% block templates %}
 
 {% endblock %}
 {% csrf_token %}

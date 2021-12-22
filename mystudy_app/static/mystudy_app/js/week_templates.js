@@ -1,6 +1,6 @@
 "use strict"
 import * as tableHandler from './schedule_table.js'
-import {clearNode} from "./schedule_table.js";
+import {clearNode, flushNode} from "./schedule_table.js";
 import {
     active_popup,
     active_popup_bg,
@@ -182,7 +182,7 @@ async function deleteTemplateLesson() {
         const response_data = await response.json()
         if(is_error_response(response_data)) return
 
-        clearNode(selected_node)
+        flushNode(selected_node)
         closeActivePopup()
     }
 }

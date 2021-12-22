@@ -36,7 +36,7 @@ class ScheduleTableHandler:
                 'color': lesson.lesson_format.color,
                 'type': lesson.type,
                 'room': lesson.room,
-                'lesson': lesson.discipline,
+                'discipline': lesson.discipline.short_name,
                 'status': 'template'
             }
         return table
@@ -60,7 +60,7 @@ class ScheduleTableHandler:
                 'color': lesson.lesson_format.color,
                 'type': lesson.type,
                 'room': lesson.room,
-                'lesson': lesson.discipline,
+                'discipline': lesson.discipline.short_name,
                 'status': lesson.status
         }
         print(custom_lessons)
@@ -141,6 +141,7 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
             return redirect('mystudy_app:all_groups')
         week_start, week_end = self.get_week_dates()
         context = {
+            'disciplines': Discipline.objects.filter(group=request.user.group),
             'templates': WeekTemplate.objects.filter(group=request.user.group).order_by('order'),
             'lesson_times': LessonTime.objects.filter(group=request.user.group).order_by('order'),
             'formats': LessonFormat.objects.filter(group=request.user.group),
@@ -234,7 +235,7 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
                 lesson_format=lesson_format,
                 type=data['type'],
                 room=data['room'],
-                discipline=data['discipline'],
+                discipline=Discipline.objects.get(pk=int(data['discipline_id'])),
                 status='custom',
             )
         except Exception as e:
@@ -259,7 +260,7 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
     def change_custom_lesson(request, data):
         try:
             lesson = Lesson.objects.get(pk=data['id'])
-            lesson.discipline = data['discipline']
+            lesson.discipline = Discipline.objects.get(pk=int(data['discipline_id']))
             lesson.type = data['type']
             lesson.room = data['room']
             lesson.lesson_format = LessonFormat.objects.get(pk=int(data['format_id']))
@@ -376,6 +377,7 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
         if request.user.group is None:
             return redirect('mystudy_app:all_groups')
         context = {
+            'disciplines': Discipline.objects.filter(group=request.user.group),
             'templates': WeekTemplate.objects.filter(group=request.user.group).order_by('order'),
             'lesson_times': LessonTime.objects.filter(group=request.user.group).order_by('order'),
             'formats': LessonFormat.objects.filter(group=request.user.group)
@@ -450,7 +452,7 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
                 lesson_format=lesson_format,
                 type=data['type'],
                 room=data['room'],
-                discipline=data['discipline'],
+                discipline=Discipline.objects.get(pk=int(data['discipline_id'])),
                 status='template'
             )
             new_template_lesson = TemplateLesson.objects.create(
@@ -473,7 +475,7 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
         try:
             lesson = TemplateLesson.objects.get(pk=int(data['template_id'])).lesson
             lesson_format = LessonFormat.objects.get(pk=int(data['format_id']))
-            lesson.discipline = data['discipline']
+            lesson.discipline = Discipline.objects.get(pk=int(data['discipline_id']))
             lesson.type = data['type']
             lesson.room = data['room']
             lesson.lesson_format = lesson_format
@@ -568,15 +570,84 @@ class DisciplinesPage(LoginRequiredMixin, TemplateView):
             })
 
 
-class TasksView(LoginRequiredMixin, TemplateView):
+class TasksPage(LoginRequiredMixin, TemplateView):
     template_name = 'mystudy_app/tasks.html'
     login_url = 'mystudy:login'
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, {})
+        context = {
+            'labels': TaskLabel.objects.all(),
+            'disciplines': Discipline.objects.filter(group=request.user.group),
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        if 'json' in request.content_type:
+            query = json.loads(request.body)
+            if 'action' in query:
+                action = query['action']
+                if action == 'add_custom_label':
+                    return self.add_custom_label(request, query['data'])
+                elif action == 'edit_custom_label':
+                    return self.edit_custom_label(request, query['data'])
+                elif action == 'delete_custom_label':
+                    return self.delete_custom_label(request, query['data'])
+                elif action == 'edit_discipline_label':
+                    return self.edit_discipline_label(request, query['data'])
+
+    @staticmethod
+    def add_custom_label(request, data):
+        try:
+            data['group'] = request.user.group
+            print(data)
+            new_label = TaskLabel.objects.create(**data)
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'id': new_label.pk
+            })
+
+    @staticmethod
+    def edit_custom_label(request, data):
+        try:
+            label = TaskLabel.objects.get(pk=data['id'])
+            label.name = data['name']
+            label.color = data['color']
+            label.save()
+        except TaskLabel.DoesNotExist:
+            return json_error_response('Неверный TaskLabel ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def delete_custom_label(request, data):
+        try:
+            TaskLabel.objects.get(pk=data['id']).delete()
+        except TaskLabel.DoesNotExist:
+            return json_error_response('Неверный TaskLabel ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def edit_discipline_label(request, data):
+        try:
+            discipline = Discipline.objects.get(pk=data['id'])
+            discipline.label_color = data['color']
+            discipline.save()
+        except TaskLabel.DoesNotExist:
+            return json_error_response('Неверный Discipline ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
 
 
-class FilesView(LoginRequiredMixin, TemplateView):
+class FilesPage(LoginRequiredMixin, TemplateView):
     template_name = 'mystudy_app/files.html'
     login_url = 'mystudy_app:login'
 

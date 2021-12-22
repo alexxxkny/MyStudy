@@ -63,7 +63,11 @@
                 <p id="weekday-info" class="edit-node-info"></p>
                 <form id="edit-form" class="edit-node-form">
                     <label for="class-input" class="base-label">Предмет:</label>
-                    <input id="class-input" type="text" name="class" placeholder="Управление проектами" class="base-input">
+                    <select id="class-input" name="class" class="base-input">
+                    {% for discipline in disciplines %}
+                        <option value="{{ discipline.pk }}">{{ discipline.short_name }}</option>
+                    {% endfor %}
+                    </select>
                     <label for="type-input" class="base-label">Вид занятия:</label>
                     <input id="type-input" type="text" name="type" placeholder="Практика" class="base-input">
                     <label for="room-input" class="base-label">Аудитория:</label>

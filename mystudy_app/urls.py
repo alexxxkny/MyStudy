@@ -12,9 +12,9 @@ urlpatterns = [
     path('schedule/templates', ScheduleTemplatesPage.as_view(), name='week_templates'),
     path('schedule/disciplines', DisciplinesPage.as_view(), name='disciplines'),
 
-    path('todo/', TasksView.as_view(), name='todo'),
+    path('todo/', TasksPage.as_view(), name='todo'),
 
-    path('files/', FilesView.as_view(), name='files'),
+    path('files/', FilesPage.as_view(), name='files'),
 
     path('login/', LoginUserView.as_view(), name='login'),
     path('logout/', logout_user, name='logout'),

@@ -23,7 +23,7 @@ function fillTable(table, table_nodes) {
                 const status_block = createStatusElement('Отменена')
                 node.insertAdjacentElement('afterbegin', status_block)
             } else {
-                node.querySelector('.node__lesson').innerText = node_data['lesson']
+                node.querySelector('.node__lesson').innerText = node_data['discipline']
                 node.querySelector('.node__type').innerText = node_data['type']
                 node.querySelector('.node__room').innerText = node_data['room']
                 node.style.backgroundColor = '#' + table[column][row]['color']
@@ -39,6 +39,9 @@ function flushTable(table_nodes_elements) {
 }
 
 function flushNode(node) {
+    if(node.children[0].classList.contains('node__status')){
+        node.children[0].remove()
+    }
     node.style.backgroundColor = 'white'
     node.children[0].innerText = 'Предмет'
     node.children[1].innerText = 'Вид занятия'
@@ -53,6 +56,9 @@ function clearTable(table_nodes_elements) {
 }
 
 function clearNode(node) {
+    if(node.children[0].classList.contains('node__status')){
+        node.children[0].remove()
+    }
     node.style.backgroundColor = 'white'
     node.children[0].innerText = ''
     node.children[1].innerText = ''
