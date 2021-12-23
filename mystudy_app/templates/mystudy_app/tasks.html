@@ -11,13 +11,10 @@
         <p>Фильтры</p>
     </div>
     <div class="filters-sidebar__filters-list">
-        <div class="filters-sidebar__filter">
+        <div id="all-filter" class="filters-sidebar__filter">
             <p>Все</p>
         </div>
-        <div class="filters-sidebar__filter">
-            <p>Общие</p>
-        </div>
-        <div class="filters-sidebar__filter">
+        <div id="today-filter" class="filters-sidebar__filter">
             <p>Сегодня</p>
         </div>
     </div>
@@ -33,12 +30,12 @@
             </div>
         </div>
         <div id="disciplines-dropdown" class="sidebar-list__items">
-            {% for discipline in disciplines %}
-                <div class="sidebar-list__item" data-id="{{ discipline.pk }}">
+            {% for id, label in discipline_labels.items %}
+                <div class="sidebar-list__item" data-id="{{ id }}">
                     <div class="sidebar-list__marker">
-                        <div class="disciplines-marker" style="background-color:{{ discipline.label_color }};"></div>
+                        <div class="disciplines-marker" style="background-color:{{ label.color }};"></div>
                     </div>
-                    <div class="sidebar-list__name">{{ discipline.short_name }}</div>
+                    <div class="sidebar-list__name">{{ label.short_name }}</div>
                     <div id="edit-task-label-btn" class="sidebar-list__edit">
                         <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
                     </div>
@@ -67,7 +64,7 @@
                         <div class="labels-marker" style="background-color:{{ label.color }}"></div>
                     </div>
                     <div class="sidebar-list__name">{{ label.name }}</div>
-                    <div id="edit-custom-label-btn" class="sidebar-list__edit">
+                    <div class="sidebar-list__edit">
                         <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
                     </div>
                 </div>
@@ -77,7 +74,65 @@
 </div>
 {% endblock %}
 {% block content %}
-    Задачи
+    <div class="narrow-content">
+        <div class="tasks">
+            <div class="filter-title">
+                <div class="filter-title__title">
+                    <p>Все задачи</p>
+                </div>
+                <div class="filter-title__add">
+                    <img src="{% static 'mystudy_app/images/icons/big_plus_icon.svg' %}" alt="">
+                </div>
+            </div>
+            <div id="tasks-list" class="tasks-list">
+                {% for task in tasks %}
+                    <div id="{{ task.id }}" class="task">
+                        <div class="task__complete">
+                            <img src="{% static 'mystudy_app/images/icons/check_icon.svg' %}" alt="" class="complete-check">
+                            <div class="complete-circle"></div>
+                        </div>
+                        <div class="task__info">
+                            <div class="task__title">
+                                <p>
+                                    {{ task.name }}
+                                </p>
+                            </div>
+                            <div class="task__filters">
+                                {% if task.deadline %}
+                                    <div class="task__deadline">
+                                        <p>
+                                            {{ task.deadline|date:"d.m" }}
+                                        </p>
+                                    </div>
+                                {% endif %}
+                                {% if task.tasklabel %}
+                                    <div class="task__label">
+                                        <div class="task__marker">
+                                            <div class="labels-marker" style="background-color: {{ task.tasklabel.color }}"></div>
+                                        </div>
+                                        <div class="task__label-text">{{ task.tasklabel.name }}</div>
+                                    </div>
+                                {% endif %}
+                                {% if task.discipline_label %}
+                                    <div class="task__discipline">
+                                        <div class="task__marker">
+                                            <div class="disciplines-marker" style="background-color: {{ task.discipline_label.color }}"></div>
+                                        </div>
+                                        <div class="task__label-text">{{ task.discipline_label.discipline.short_name }}</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="task__edit-block">
+                            <div class="task__edit">
+                                <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block popups %}
@@ -142,6 +197,42 @@
     <div class="sidebar-list__name"></div>
     <div id="edit-custom-label-btn" class="sidebar-list__edit">
         <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+    </div>
+</div>
+</template>
+
+<template id="task-template">
+<div class="task">
+    <div class="task__complete">
+        <img src="{% static 'mystudy_app/images/icons/check_icon.svg' %}" alt="" class="complete-check">
+        <div class="complete-circle"></div>
+    </div>
+    <div class="task__info">
+        <div class="task__title">
+            <p></p>
+        </div>
+        <div class="task__filters">
+            <div class="task__deadline">
+                <p></p>
+            </div>
+            <div class="task__label">
+                <div class="task__marker">
+                    <div class="labels-marker"></div>
+                </div>
+                <div class="task__label-text"></div>
+            </div>
+            <div class="task__discipline">
+                <div class="task__marker">
+                    <div class="disciplines-marker"></div>
+                </div>
+                <div class="task__label-text"></div>
+            </div>
+        </div>
+    </div>
+    <div class="task__edit-block">
+        <div class="task__edit">
+            <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+        </div>
     </div>
 </div>
 </template>

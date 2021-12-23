@@ -17,7 +17,9 @@ import json, copy, traceback
 class MyJsonEncoder(JSONEncoder):
     def default(self, obj):
         data_dict = obj.__dict__.copy()
-        data_dict.pop('_state')
+        print(data_dict)
+        if '_state' in data_dict:
+            data_dict.pop('_state')
         return data_dict
 
 
@@ -576,8 +578,9 @@ class TasksPage(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = {
-            'labels': TaskLabel.objects.all(),
-            'disciplines': Discipline.objects.filter(group=request.user.group),
+            'discipline_labels': self.get_discipline_labels(request),
+            'tasks': Task.objects.filter(user=request.user),
+            'labels': TaskLabel.objects.filter(user=request.user),
         }
         return render(request, self.template_name, context)
 
@@ -594,11 +597,59 @@ class TasksPage(LoginRequiredMixin, TemplateView):
                     return self.delete_custom_label(request, query['data'])
                 elif action == 'edit_discipline_label':
                     return self.edit_discipline_label(request, query['data'])
+                elif action == 'get_discipline_labels':
+                    return json_success_response({
+                        'discipline_labels': self.get_discipline_labels(request)
+                    })
+                elif action == 'get_custom_labels':
+                    return json_success_response({
+                        'custom_labels': self.get_custom_labels(request)
+                    })
+                elif action == 'get_tasks':
+                    return json_success_response({
+                        'tasks': self.get_tasks(request)
+                    })
+
+    @staticmethod
+    def get_tasks(request):
+        tasks = {}
+        for task in Task.objects.filter(user=request.user):
+            tasks[task.pk] = {
+                'name': task.name,
+                'custom_label_id': task.tasklabel.pk if task.tasklabel else None,
+                'discipline_label_id': task.discipline_label.pk if task.discipline_label else None,
+                'deadline': task.deadline.strftime('%d.%m')
+            }
+        return tasks
+
+    @staticmethod
+    def get_discipline_labels(request):
+        discipline_labels = {}
+        for discipline in Discipline.objects.filter(group=request.user.group):
+            label, created = discipline.disciplinelabel_set.get_or_create(user=request.user, defaults={
+                'color': '#FF0000',
+                'discipline': discipline
+            })
+            discipline_labels[label.pk] = {
+                'short_name': discipline.short_name,
+                'color': label.color
+            }
+        return discipline_labels
+
+    @staticmethod
+    def get_custom_labels(request):
+        custom_labels = {}
+        for label in TaskLabel.objects.filter(user=request.user):
+            custom_labels[label.pk] = {
+                'name': label.name,
+                'color': label.color
+            }
+        return custom_labels
 
     @staticmethod
     def add_custom_label(request, data):
         try:
-            data['group'] = request.user.group
+            data['user'] = request.user
             print(data)
             new_label = TaskLabel.objects.create(**data)
         except Exception as e:
@@ -636,11 +687,11 @@ class TasksPage(LoginRequiredMixin, TemplateView):
     @staticmethod
     def edit_discipline_label(request, data):
         try:
-            discipline = Discipline.objects.get(pk=data['id'])
-            discipline.label_color = data['color']
-            discipline.save()
-        except TaskLabel.DoesNotExist:
-            return json_error_response('Неверный Discipline ID')
+            label = DisciplineLabel.objects.get(pk=data['id'])
+            label.color = data['color']
+            label.save()
+        except DisciplineLabel.DoesNotExist:
+            return json_error_response('Неверный DisciplineLabel ID')
         except Exception as e:
             return json_error_response(e)
         else:
