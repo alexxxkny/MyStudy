@@ -29,6 +29,12 @@ ALLOWED_HOSTS = []
 # Custom User Class
 AUTH_USER_MODEL = 'mystudy_app.User'
 
+# Files storage root
+
+MEDIA_ROOT = os.curdir
+
+MEDIA_URL = 'http://localhost:8000/media/'
+
 # Application definition
 
 INSTALLED_APPS = [

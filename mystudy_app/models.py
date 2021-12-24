@@ -121,3 +121,15 @@ class Task(models.Model):
 
     def __str__(self):
         return f'Task(id={self.id}, name={self.name}, deadline={self.deadline}, user={self.user})'
+
+
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/group_<id>/<filename>
+    return 'group_{0}/{1}'.format(instance.group.pk, filename)
+
+
+class File(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name='ID')
+    adding_datetime = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to=user_directory_path)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)

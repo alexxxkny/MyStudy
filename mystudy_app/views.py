@@ -11,7 +11,7 @@ from django.views.generic import CreateView, TemplateView, ListView, DetailView
 from .forms import *
 from datetime import time, date, timedelta
 from json import JSONEncoder
-import json, copy, traceback
+import json, copy, traceback, os
 
 
 class MyJsonEncoder(JSONEncoder):
@@ -766,7 +766,68 @@ class FilesPage(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         if request.user.group is None:
             return redirect('mystudy_app:all_groups')
-        return render(request, self.template_name, {})
+        context = {
+            'files': File.objects.filter(group=request.user.group),
+            'discipline_labels': TasksPage.get_discipline_labels(request)
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        if 'json' in request.content_type:
+            query = json.loads(request.body)
+            if 'action' in query:
+                action = query['action']
+                if action == 'get_discipline_labels':
+                    return json_success_response({
+                        'discipline_labels': self.get_discipline_labels(request)
+                    })
+                elif action == 'get_files':
+                    return json_success_response({
+                        'files': self.get_files(request)
+                    })
+                elif action == 'edit_discipline_label':
+                    return self.edit_discipline_label(request, query['data'])
+
+    @staticmethod
+    def get_discipline_labels(request):
+        discipline_labels = {}
+        for discipline in Discipline.objects.filter(group=request.user.group):
+            label, created = discipline.disciplinelabel_set.get_or_create(user=request.user, defaults={
+                'color': '#FF0000',
+                'discipline': discipline
+            })
+            discipline_labels[label.pk] = {
+                'short_name': discipline.short_name,
+                'color': label.color
+            }
+        return discipline_labels
+
+    @staticmethod
+    def edit_discipline_label(request, data):
+        try:
+            label = DisciplineLabel.objects.get(pk=data['id'])
+            label.color = data['color']
+            label.save()
+        except DisciplineLabel.DoesNotExist:
+            return json_error_response('Неверный DisciplineLabel ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def get_files(request):
+        files_data = {}
+        files = File.objects.filter(group=request.user.group)
+        for file in files:
+            file_name = file.file.name
+            file_name = file_name[file_name.find('/') + 1:]
+            files_data[file.pk] = {
+                'name': file_name,
+                'extension': os.path.splitext(file_name)[1],
+                'adding_datetime': file.adding_datetime
+            }
+        return files_data
 
 
 class RegisterUserView(CreateView):

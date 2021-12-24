@@ -1,5 +1,5 @@
 "use strict"
-import * as dropdown from './dropdown_handler.js'
+import * as dropdown from './sidebar_handler.js'
 import * as popup from './popup_handler.js'
 import {openPopup} from "./popup_handler.js";
 

@@ -55,5 +55,10 @@ class TaskLabelAdmin(admin.ModelAdmin):
 
 
 @admin.register(Task)
-class Task(admin.ModelAdmin):
+class TaskAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'deadline', 'user')
+
+
+@admin.register(File)
+class FileAdmin(admin.ModelAdmin):
+    list_display = ('id', 'adding_datetime', 'file', 'group')

@@ -1,9 +1,11 @@
 {% extends 'mystudy_app/base.html' %}
 {% load static %}
+{% load mystudy_tags %}
 
 {% block links %}
     <link rel="stylesheet" href="{% static 'mystudy_app/css/sidebar.css' %}">
     <link rel="stylesheet" href="{% static 'mystudy_app/css/files.css' %}">
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/tasks.css' %}">
 {% endblock %}
 
 {% block sidebar %}
@@ -40,4 +42,64 @@
 {% endblock %}
 
 {% block content %}
+    <div class="narrow-content">
+        <div class="files">
+            <div class="filter-title">
+                <div class="filter-title__title">
+                    <p>Все файлы</p>
+                </div>
+                <div class="filter-title__add">
+                    <div id="upload-file-btn" class="filter-title__add-btn">
+                        <img src="{% static 'mystudy_app/images/icons/upload_icon.svg' %}" alt="">
+                    </div>
+                </div>
+            </div>
+            <div class="files-list">
+                {% for _ in 12|times %}
+                    <div class="file-node">
+                        <div class="file-node__img">
+                            <img src="{% static 'mystudy_app/images/icons/files/word_img.svg' %}" alt="">
+                        </div>
+                        <div class="file-node__actions">
+                            <div class="file-node__info">
+                                <div class="file-node__title">
+                                    <p>Название.docx</p>
+                                </div>
+                                <div class="file-node__datetime">
+                                    <p>24.12.2021 20:39</p>
+                                </div>
+                            </div>
+                            <div class="file-node__download">
+                                <img src="{% static 'mystudy_app/images/icons/download_icon.svg'%}" alt="">
+                            </div>
+                            <div class="file-node__edit">
+                                <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block popups %}
+    <div id="edit-discipline-popup-bg" class="base-popup-background">
+    <div id="edit-discipline-popup" class="base-popup">
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Изменить цвет</p>
+            </div>
+            <form id="edit-discipline-form" class="base-popup__form">
+                <label for="color-input" class="base-label">Цвет:</label>
+                <input id="color-input" type="color" name="color" class="base-color-input">
+                <input type="submit" value="Добавить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="module" src="{% static 'mystudy_app/js/files.js' %}"></script>
 {% endblock %}
