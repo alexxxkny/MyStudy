@@ -1,5 +1,43 @@
 {% extends 'mystudy_app/base.html' %}
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/files.css' %}">
+{% endblock %}
+
+{% block sidebar %}
+<div class="filters-sidebar">
+    <div class="filters-sidebar__title">
+        <p>Фильтры</p>
+    </div>
+    <div class="sidebar-list">
+        <div id="disciplines-dropdown-toggle" class="sidebar-list__header">
+            <div class="sidebar-list__title">
+                <p>Предметы</p>
+            </div>
+            <div class="sidebar-list__buttons">
+                <div id="toggle-arrow" class="sidebar-list__arrow">
+                    <img src="{% static 'mystudy_app/images/icons/dropdown_arrow.svg' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div id="disciplines-dropdown" class="sidebar-list__items">
+            {% for id, label in discipline_labels.items %}
+                <div class="sidebar-list__item" data-id="{{ id }}">
+                    <div class="sidebar-list__marker">
+                        <div class="disciplines-marker" style="background-color:{{ label.color }};"></div>
+                    </div>
+                    <div class="sidebar-list__name">{{ label.short_name }}</div>
+                    <div id="edit-task-label-btn" class="sidebar-list__edit">
+                        <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 {% block content %}
-    Файлы
 {% endblock %}

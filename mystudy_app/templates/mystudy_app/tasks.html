@@ -3,6 +3,7 @@
 
 {% block links %}
     <link rel="stylesheet" href="{% static 'mystudy_app/css/tasks.css' %}">
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/sidebar.css' %}">
 {% endblock %}
 
 {% block sidebar %}
@@ -81,12 +82,14 @@
                     <p>Все задачи</p>
                 </div>
                 <div class="filter-title__add">
-                    <img src="{% static 'mystudy_app/images/icons/big_plus_icon.svg' %}" alt="">
+                    <div id="add-task-btn" class="filter-title__add-btn">
+                        <img src="{% static 'mystudy_app/images/icons/big_plus_icon.svg' %}" alt="">
+                    </div>
                 </div>
             </div>
             <div id="tasks-list" class="tasks-list">
                 {% for task in tasks %}
-                    <div id="{{ task.id }}" class="task">
+                    <div data-id="{{ task.id }}" class="task">
                         <div class="task__complete">
                             <img src="{% static 'mystudy_app/images/icons/check_icon.svg' %}" alt="" class="complete-check">
                             <div class="complete-circle"></div>
@@ -152,7 +155,8 @@
         </div>
     </div>
 </div>
-    <div id="edit-label-popup-bg" class="base-popup-background">
+
+<div id="edit-label-popup-bg" class="base-popup-background">
     <div id="edit-label-popup" class="base-popup">
         <div id="delete-label-btn" class="base-popup__delete-btn">
             <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
@@ -171,6 +175,7 @@
         </div>
     </div>
 </div>
+
 <div id="edit-discipline-popup-bg" class="base-popup-background">
     <div id="edit-discipline-popup" class="base-popup">
         <div class="base-popup__inner">
@@ -180,6 +185,71 @@
             <form id="edit-discipline-form" class="base-popup__form">
                 <label for="color-input" class="base-label">Цвет:</label>
                 <input id="color-input" type="color" name="color" class="base-color-input">
+                <input type="submit" value="Добавить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="edit-task-popup-bg" class="base-popup-background">
+    <div id="edit-task-popup" class="base-popup">
+        <div id="delete-task-btn" class="base-popup__delete-btn">
+            <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
+        </div>
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Изменить задачу</p>
+            </div>
+            <form id="edit-task-form" class="base-popup__form">
+                <label for="name-input" class="base-label">Название:</label>
+                <input id="name-input" type="text" name="name" placeholder="Сделать..." class="base-input">
+                <label for="label-select" class="base-label">Метка:</label>
+                <select id="label-select" name="custom_label_id" class="base-input">
+                    <option value="0">- - -</option>
+                    {% for label in labels %}
+                        <option value="{{ label.pk }}">{{ label.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="discipline-select" class="base-label">Предмет:</label>
+                <select id="discipline-select" name="discipline_label_id" class="base-input">
+                    <option value="0">- - -</option>
+                    {% for key, item in discipline_labels.items %}
+                        <option value="{{ key }}">{{ item.short_name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="date-input" class="base-label">Дедлайн:</label>
+                <input id="date-input" type="date" name="deadline" class="base-input">
+                <input type="submit" value="Сохранить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="add-task-popup-bg" class="base-popup-background">
+    <div id="add-task-popup" class="base-popup">
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Добавить задачу</p>
+            </div>
+            <form id="add-task-form" class="base-popup__form">
+                <label for="name-input" class="base-label">Название:</label>
+                <input id="name-input" type="text" name="name" placeholder="Сделать..." class="base-input">
+                <label for="label-select" class="base-label">Метка:</label>
+                <select id="label-select" name="custom_label_id" class="base-input">
+                    <option value="0">- - -</option>
+                    {% for label in labels %}
+                        <option value="{{ label.pk }}">{{ label.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="discipline-select" class="base-label">Предмет:</label>
+                <select id="discipline-select" name="discipline_label_id" class="base-input">
+                    <option value="0">- - -</option>
+                    {% for key, item in discipline_labels.items %}
+                        <option value="{{ key }}">{{ item.short_name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="date-input" class="base-label">Дедлайн:</label>
+                <input id="date-input" type="date" name="deadline" class="base-input">
                 <input type="submit" value="Добавить" class="base-btn">
             </form>
         </div>

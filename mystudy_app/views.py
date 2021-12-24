@@ -609,6 +609,12 @@ class TasksPage(LoginRequiredMixin, TemplateView):
                     return json_success_response({
                         'tasks': self.get_tasks(request)
                     })
+                elif action == 'delete_task':
+                    return self.delete_task(request, query['data'])
+                elif action == 'edit_task':
+                    return self.edit_task(request, query['data'])
+                elif action == 'add_task':
+                    return self.add_task(request, query['data'])
 
     @staticmethod
     def get_tasks(request):
@@ -618,7 +624,7 @@ class TasksPage(LoginRequiredMixin, TemplateView):
                 'name': task.name,
                 'custom_label_id': task.tasklabel.pk if task.tasklabel else None,
                 'discipline_label_id': task.discipline_label.pk if task.discipline_label else None,
-                'deadline': task.deadline.strftime('%d.%m')
+                'deadline': task.deadline.strftime('%d.%m') if task.deadline else None
             }
         return tasks
 
@@ -696,6 +702,61 @@ class TasksPage(LoginRequiredMixin, TemplateView):
             return json_error_response(e)
         else:
             return json_success_response()
+
+    @staticmethod
+    def delete_task(request, data):
+        try:
+            Task.objects.get(pk=data['id'], user=request.user).delete()
+        except Task.DoesNotExist:
+            return json_error_response('Неверный Task ID')
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def edit_task(request, data):
+        try:
+            print(data)
+            task = Task.objects.get(pk=data['id'], user=request.user)
+            task.name = data['name']
+            task.tasklabel = TaskLabel.objects.get(pk=data['custom_label_id'], user=request.user) if data['custom_label_id'] != '0' else None
+            task.discipline_label = DisciplineLabel.objects.get(pk=data['discipline_label_id'], user=request.user) if data['discipline_label_id'] != '0' else None
+            task.deadline = date.fromisoformat(data['deadline']) if data['deadline'] else None
+            task.save()
+        except Task.DoesNotExist:
+            return json_error_response('Неверный Task ID')
+        except TaskLabel.DoesNotExist:
+            return json_error_response('Неверный TaskLabel ID')
+        except DisciplineLabel.DoesNotExist:
+            return json_error_response('Неверный DisciplineLabel ID')
+        except Exception as e:
+            traceback.format_exc()
+            print(e)
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def add_task(request, data):
+        try:
+            print(data)
+            tasklabel = TaskLabel.objects.get(pk=data['custom_label_id'], user=request.user) if data['custom_label_id'] != '0' else None
+            discipline_label = DisciplineLabel.objects.get(pk=data['discipline_label_id'], user=request.user) if data['discipline_label_id'] != '0' else None
+            deadline = date.fromisoformat(data['deadline']) if data['deadline'] else None
+            new_task = Task.objects.create(
+                user=request.user,
+                name=data['name'],
+                tasklabel=tasklabel,
+                discipline_label=discipline_label,
+                deadline=deadline
+            )
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'id': new_task.pk
+            })
 
 
 class FilesPage(LoginRequiredMixin, TemplateView):
