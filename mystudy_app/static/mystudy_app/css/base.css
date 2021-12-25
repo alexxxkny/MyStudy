@@ -166,6 +166,11 @@ input{
     width: 80px;
     height: 40px;
 }
+.base-file-input {
+    width: 300px;
+    height: 40px;
+    font-size: 16px;
+}
 
 /*  POPUP  */
 

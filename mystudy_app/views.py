@@ -1,4 +1,5 @@
 import datetime
+import mimetypes
 
 import data as data
 from django.contrib.auth import logout, login
@@ -6,12 +7,13 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.views.generic import CreateView, TemplateView, ListView, DetailView
 from .forms import *
 from datetime import time, date, timedelta
 from json import JSONEncoder
-import json, copy, traceback, os
+import json, traceback, os
+from MyStudy import settings
 
 
 class MyJsonEncoder(JSONEncoder):
@@ -109,6 +111,18 @@ def get_schedule_table(group, start_date=None, end_date=None):
 
     template_lessons = TemplateLesson.objects.filter(group=group, week_template=week_template_order)
     return template_lessons
+
+
+def download_file(request, path):
+    print(path)
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            mime_type, _ = mimetypes.guess_type(file_path)
+            response = HttpResponse(fh.read(), content_type=mime_type)
+            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+            return response
+    raise Http404
 
 
 def index(request):
@@ -787,6 +801,13 @@ class FilesPage(LoginRequiredMixin, TemplateView):
                     })
                 elif action == 'edit_discipline_label':
                     return self.edit_discipline_label(request, query['data'])
+                elif action == 'delete_file':
+                    return self.delete_file(request, query['data'])
+        elif 'form' in request.content_type:
+            print('see')
+            return self.upload_file(request, request.POST, request.FILES)
+        else:
+            print(request.content_type)
 
     @staticmethod
     def get_discipline_labels(request):
@@ -798,7 +819,7 @@ class FilesPage(LoginRequiredMixin, TemplateView):
             })
             discipline_labels[label.pk] = {
                 'short_name': discipline.short_name,
-                'color': label.color
+                'color': label.color,
             }
         return discipline_labels
 
@@ -820,14 +841,67 @@ class FilesPage(LoginRequiredMixin, TemplateView):
         files_data = {}
         files = File.objects.filter(group=request.user.group)
         for file in files:
-            file_name = file.file.name
-            file_name = file_name[file_name.find('/') + 1:]
+            if file.discipline:
+                discipline_label_id = file.discipline.disciplinelabel_set.get(user=request.user).pk
+            else:
+                discipline_label_id = None
             files_data[file.pk] = {
-                'name': file_name,
-                'extension': os.path.splitext(file_name)[1],
-                'adding_datetime': file.adding_datetime
+                'name': os.path.basename(file.file.name).replace('_', ' '),
+                'extension': os.path.splitext(file.file.name)[1],
+                'adding_datetime': file.adding_datetime.strftime('%d.%m.%Y %H:%M'),
+                'url': file.file.url,
+                'discipline_label_id': discipline_label_id
             }
         return files_data
+
+    @staticmethod
+    def upload_file(request, data, files):
+        try:
+            discipline_label_id = int(data['discipline_label_id'][0])
+            if discipline_label_id != 0:
+                label = DisciplineLabel.objects.get(pk=discipline_label_id, user=request.user)
+                discipline = label.discipline
+            else:
+                discipline_label_id = None
+                discipline = None
+            new_file = File.objects.create(
+                file=files['file'],
+                discipline=discipline,
+                group=request.user.group
+            )
+        except DisciplineLabel.DoesNotExist:
+            return json_error_response('Неверны DisciplineLabel ID')
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'id': new_file.pk,
+                'file_info': {
+                    'name': os.path.basename(new_file.file.name).replace('_', ' '),
+                    'extension': os.path.splitext(new_file.file.name)[1],
+                    'adding_datetime': new_file.adding_datetime.strftime('%d.%m.%Y %H:%M'),
+                    'url': new_file.file.url,
+                    'discipline_label_id': discipline_label_id
+                }
+            })
+
+    @staticmethod
+    def delete_file(request, data):
+        try:
+            file = File.objects.get(pk=data['id'])
+            file_path = file.file.path
+            os.remove(file_path)
+            file.delete()
+        except File.DoesNotExist:
+            return json_error_response('Неверный File ID')
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+            return json_error_response(e)
+        else:
+            return json_success_response()
 
 
 class RegisterUserView(CreateView):

@@ -13,6 +13,11 @@
     <div class="filters-sidebar__title">
         <p>Фильтры</p>
     </div>
+    <div class="filters-sidebar__filters-list">
+        <div id="all-filter" class="filters-sidebar__filter">
+            <p>Все</p>
+        </div>
+    </div>
     <div class="sidebar-list">
         <div id="disciplines-dropdown-toggle" class="sidebar-list__header">
             <div class="sidebar-list__title">
@@ -55,29 +60,6 @@
                 </div>
             </div>
             <div class="files-list">
-                {% for _ in 12|times %}
-                    <div class="file-node">
-                        <div class="file-node__img">
-                            <img src="{% static 'mystudy_app/images/icons/files/word_img.svg' %}" alt="">
-                        </div>
-                        <div class="file-node__actions">
-                            <div class="file-node__info">
-                                <div class="file-node__title">
-                                    <p>Название.docx</p>
-                                </div>
-                                <div class="file-node__datetime">
-                                    <p>24.12.2021 20:39</p>
-                                </div>
-                            </div>
-                            <div class="file-node__download">
-                                <img src="{% static 'mystudy_app/images/icons/download_icon.svg'%}" alt="">
-                            </div>
-                            <div class="file-node__edit">
-                                <img src="{% static 'mystudy_app/images/icons/dots_icon.svg' %}" alt="">
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
             </div>
         </div>
     </div>
@@ -98,8 +80,55 @@
         </div>
     </div>
 </div>
+    <div id="upload-file-popup-bg" class="base-popup-background">
+        <div id="upload-file-popup" class="base-popup">
+            <div class="base-popup__inner">
+                <div class="base-popup__title">
+                    <p>Загрузить файл</p>
+                </div>
+                <form id="upload-file-form" class="base-popup__form">
+                    <label for="discipline-select" class="base-label">Предмет:</label>
+                    <select id="discipline-select" name="discipline_label_id" class="base-input">
+                    <option value="0">- - -</option>
+                    {% for key, item in discipline_labels.items %}
+                        <option value="{{ key }}">{{ item.short_name }}</option>
+                    {% endfor %}
+                </select>
+                    <label for="file-input" class="base-label">Файл:</label>
+                    <input type="file" name="file" class="base-file-input">
+                    <input type="submit" value="Загрузить" class="base-btn">
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     <script type="module" src="{% static 'mystudy_app/js/files.js' %}"></script>
+{% endblock %}
+
+{% block templates %}
+<template id="template-node">
+<div class="file-node">
+    <div class="file-node__download">
+        <a href="">
+            <img src="{% static 'mystudy_app/images/icons/download_icon.svg'%}" alt="">
+        </a>
+        </div>
+    <div class="file-node__delete">
+            <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
+        </div>
+    <div class="file-node__img">
+        <img src="" alt="">
+    </div>
+    <div class="file-node__info">
+            <div class="file-node__title">
+                <p></p>
+            </div>
+            <div class="file-node__datetime">
+                <p></p>
+            </div>
+        </div>
+</div>
+</template>
 {% endblock %}

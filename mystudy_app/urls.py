@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('todo/', TasksPage.as_view(), name='todo'),
 
+    path('media/<path:path>', download_file),
     path('files/', FilesPage.as_view(), name='files'),
 
     path('login/', LoginUserView.as_view(), name='login'),

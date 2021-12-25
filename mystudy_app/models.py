@@ -132,4 +132,5 @@ class File(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
     adding_datetime = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to=user_directory_path)
+    discipline = models.ForeignKey('Discipline', on_delete=models.SET_NULL, null=True, blank=True)
     group = models.ForeignKey('Group', on_delete=models.CASCADE)
