@@ -1,5 +1,99 @@
 {% extends 'mystudy_app/base.html' %}
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/news.css' %}">
+{% endblock %}
 
 {% block content %}
-    Новости
+    <div class="narrow-content">
+        <div class="news">
+            <div class="news-title">
+                <div class="news-title__title">
+                    <p>Новости</p>
+                </div>
+                <div class="news-title__add">
+                    <div id="add-news-btn">
+                        <img src="{% static 'mystudy_app/images/icons/big_plus_icon.svg' %}" alt="">
+                    </div>
+                </div>
+            </div>
+            <div class="news-list">
+                {% for news in news_list %}
+                    <div class="news-item">
+                        <div class="news-item__head">
+                            <div class="news-item__title">
+                                <p>{{ news.title }}</p>
+                            </div>
+                            <div class="news-item__datetime">
+                                {{ news.adding_datetime|date:"d.m.Y H:i" }}
+                            </div>
+                        </div>
+                        <div class="news-item__body">
+                            <div class="news-item__description">
+                                <p>{{ news.content|linebreaks }}</p>
+                            </div>
+                            <div class="news-item__picture">
+                                {% if news.topic == 'custom' %}
+                                    <img src="{% static 'mystudy_app/images/icons/nav/news.svg' %}" alt="">
+                                {% endif %}
+                                {% if news.topic == 'schedule' %}
+                                    <img src="{% static 'mystudy_app/images/icons/nav/schedule.svg' %}" alt="">
+                                {% endif %}
+                                {% if news.topic == 'files' %}
+                                    <img src="{% static 'mystudy_app/images/icons/nav/files.svg' %}" alt="">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block popups %}
+<div id="add-news-popup-bg" class="base-popup-background">
+    <div id="add-news-popup" class="base-popup">
+        <div class="base-popup__inner">
+            <div class="base-popup__title">
+                <p>Добавить объявление</p>
+            </div>
+            <form id="add-news-form" class="base-popup__form">
+                <label for="title-input" class="base-label">Заголовок:</label>
+                <input id="title-input" type="text" name="title" class="base-input">
+                <label for="content-input" class="base-label">Содержание:</label>
+                <textarea name="content" id="content-input" cols="30" rows="10" class="base-textarea"></textarea>
+                <input type="submit" value="Добавить" class="base-btn">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block templates %}
+<template id="news-template">
+    <div class="news-item">
+        <div class="news-item__head">
+            <div class="news-item__title">
+                <p></p>
+            </div>
+            <div class="news-item__datetime">
+                <p></p>
+            </div>
+        </div>
+        <div class="news-item__body">
+            <div class="news-item__description">
+                <p></p>
+            </div>
+            <div class="news-item__picture">
+                <img src="" alt="">
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+    <script type="module" src="{% static  'mystudy_app/js/news.js' %}"></script>
 {% endblock %}

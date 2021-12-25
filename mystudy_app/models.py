@@ -7,7 +7,7 @@ from slugger import AutoSlugField
 
 
 class User(AbstractUser):
-    middle_name = models.CharField(max_length=150, null=True)
+    middle_name = models.CharField(max_length=150, null=True, blank=True)
     group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True)
 
 
@@ -134,3 +134,16 @@ class File(models.Model):
     file = models.FileField(upload_to=user_directory_path)
     discipline = models.ForeignKey('Discipline', on_delete=models.SET_NULL, null=True, blank=True)
     group = models.ForeignKey('Group', on_delete=models.CASCADE)
+
+
+class News(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name='ID')
+    topic = models.CharField(max_length=20)
+    title = models.CharField(max_length=50)
+    content = models.TextField(null=True, blank=True)
+    adding_datetime = models.DateTimeField(auto_now_add=True)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'News(id={self.id}, topic={self.topic}, title={self.title}, adding_datetime={self.adding_datetime}, ' \
+               f'group={self.group})'

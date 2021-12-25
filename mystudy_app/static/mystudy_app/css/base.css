@@ -171,6 +171,13 @@ input{
     height: 40px;
     font-size: 16px;
 }
+.base-textarea {
+    width: 300px;
+    border: 1px solid black;
+    font-size: 20px;
+    color: black;
+    padding: 5px 10px;
+}
 
 /*  POPUP  */
 

@@ -53,13 +53,13 @@ edit_discipline_form.addEventListener('submit', async (e) => {
     await editDiscipline()
 })
 
-function getFormData(form) {
-    const form_obj = new FormData(form)
-
-    let form_data = {}
-    for(let item of form_obj.entries()) form_data[item[0]] = item[1]
-    return form_data
-}
+// function getFormData(form) {
+//     const form_obj = new FormData(form)
+//
+//     let form_data = {}
+//     for(let item of form_obj.entries()) form_data[item[0]] = item[1]
+//     return form_data
+// }
 
 // Discipline functions
 

@@ -62,3 +62,7 @@ class TaskAdmin(admin.ModelAdmin):
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
     list_display = ('id', 'adding_datetime', 'file', 'group')
+
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'adding_datetime', 'title', 'group')

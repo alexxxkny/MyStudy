@@ -145,7 +145,37 @@ class NewsPage(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         if request.user.group is None:
             return redirect('mystudy_app:all_groups')
-        return render(request, self.template_name, {})
+        context = {
+            'news_list': News.objects.filter(group=request.user.group).order_by('-adding_datetime')
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        if 'json' in request.content_type:
+            query = json.loads(request.body)
+            if 'action' in query:
+                action = query['action']
+                if action == 'add_news':
+                    return self.add_news(request, query['data'])
+        raise Http404
+
+    @staticmethod
+    def add_news(request, data):
+        try:
+            news = News.objects.create(
+                title=data['title'],
+                content=data['content'],
+                topic='custom',
+                group=request.user.group
+            )
+        except Exception as e:
+            return json_error_response(e)
+        else:
+            return json_success_response({
+                'title': news.title,
+                'content': news.content,
+                'datetime': news.adding_datetime.strftime('%d.%m.%Y %H:%M')
+            })
 
 
 class SchedulePage(LoginRequiredMixin, TemplateView):
@@ -235,6 +265,22 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
         except Exception as e:
             return json_error_response(e)
         else:
+            news_content = f'Дата: {canceled_lesson.date.strftime("%d.%m.%Y")}' \
+                           f'\nВремя: {canceled_lesson.lesson_time.start.strftime("%H:%M")}' \
+                           f' - {canceled_lesson.lesson_time.end.strftime("%H:%M")}'
+            news_content += f'\nПредмет: {canceled_lesson.discipline.short_name}'
+            if canceled_lesson.type:
+                news_content += f', {canceled_lesson.type}'
+            if canceled_lesson.room:
+                news_content += f'\nАудитория: {canceled_lesson.room}'
+            if canceled_lesson.lesson_format:
+                news_content += f'\nФормат: {canceled_lesson.lesson_format.name}'
+            News.objects.create(
+                topic='schedule',
+                title='Занятие отменено',
+                content=news_content,
+                group=request.user.group
+            )
             return json_success_response({
                 'id': canceled_lesson.pk,
                 'status': canceled_lesson.status,
@@ -257,6 +303,22 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
         except Exception as e:
             return json_error_response(e)
         else:
+            news_content = f'Дата: {new_lesson.date.strftime("%d.%m.%Y")}' \
+                           f'\nВремя: {new_lesson.lesson_time.start.strftime("%H:%M")}' \
+                           f' - {new_lesson.lesson_time.end.strftime("%H:%M")}'
+            news_content += f'\nПредмет: {new_lesson.discipline.short_name}'
+            if new_lesson.type:
+                news_content += f', {new_lesson.type}'
+            if new_lesson.room:
+                news_content += f'\nАудитория: {new_lesson.room}'
+            if new_lesson.lesson_format:
+                news_content += f'\nФормат: {new_lesson.lesson_format.name}'
+            News.objects.create(
+                topic='schedule',
+                title='Добавлено занятие',
+                content=news_content,
+                group=request.user.group
+            )
             return json_success_response({
                 'id': new_lesson.pk,
                 'color': lesson_format.color,
@@ -876,10 +938,20 @@ class FilesPage(LoginRequiredMixin, TemplateView):
             print(e)
             return json_error_response(e)
         else:
+            filename = os.path.basename(new_file.file.name).replace('_', ' ')
+            news_content = f'{filename} был добавлен в файлообменник.'
+            if new_file.discipline:
+                news_content += f'\n \nПредмет: {new_file.discipline.short_name}'
+            News.objects.create(
+                topic='files',
+                title='Загружен новый файл',
+                group=request.user.group,
+                content=news_content
+            )
             return json_success_response({
                 'id': new_file.pk,
                 'file_info': {
-                    'name': os.path.basename(new_file.file.name).replace('_', ' '),
+                    'name': filename,
                     'extension': os.path.splitext(new_file.file.name)[1],
                     'adding_datetime': new_file.adding_datetime.strftime('%d.%m.%Y %H:%M'),
                     'url': new_file.file.url,

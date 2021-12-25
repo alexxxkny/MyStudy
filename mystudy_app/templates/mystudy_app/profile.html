@@ -1,5 +1,58 @@
 {% extends 'mystudy_app/base.html' %}
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/profile.css' %}">
+{% endblock %}
 
 {% block content %}
-    Личный кабинет
+    <div class="narrow-content">
+        <div class="profile">
+            <div class="profile-title">
+                <p>Личный кабинет пользователя</p>
+            </div>
+            <div class="profile-table">
+                <div class="profile-table__label">
+                    <p>Логин</p>
+                </div>
+                <div class="profile-table__value">
+                    <p>{{ user.username }}</p>
+                </div>
+                <div class="profile-table__label">
+                    <p>Фамилия</p>
+                </div>
+                <div class="profile-table__value">
+                    <p>{{ user.last_name}}</p>
+                </div>
+                <div class="profile-table__label">
+                    <p>Имя</p>
+                </div>
+                <div class="profile-table__value">
+                    <p>{{ request.user.first_name }}</p>
+                </div>
+                {% if request.user.middle_name %}
+                    <div class="profile-table__label">
+                        <p>Отчество</p>
+                    </div>
+                    <div class="profile-table__value">
+                        <p>{{ request.user.middle_name }}</p>
+                    </div>
+                {% endif %}
+                <div class="profile-table__label">
+                    <p>Email</p>
+                </div>
+                <div class="profile-table__value">
+                    <p>{{ request.user.email }}</p>
+                </div>
+                {% if request.user.group %}
+                    <div class="profile-table__label">
+                        <p>Группа</p>
+                    </div>
+                    <div class="profile-table__value">
+                        <p>{{ request.user.group.name }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
