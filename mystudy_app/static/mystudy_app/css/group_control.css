@@ -1,0 +1,91 @@
+.group-control {
+    width: 60%;
+
+    display: flex;
+    flex-direction: column;
+}
+.group-control-title {
+    display: flex;
+    align-items: center;
+
+    margin: 20px 0;
+}
+.group-control-title p {
+    font-size: 30px;
+}
+.menu-block {
+    display: flex;
+    flex-direction: column;
+
+    margin: 0 0 30px 0;
+}
+.menu-block__title {
+    display: flex;
+    align-items: center;
+
+    margin: 0 0 10px 0;
+}
+.menu-block__title p {
+    font-size: 22px;
+}
+.menu-block__table {
+    display: flex;
+    flex-direction: column;
+}
+.row {
+    display: grid;
+    grid-template-columns: 40px 1fr 1fr 1fr;
+    border: 2px solid #AAAAFF8F;
+    margin: 0 0 4px 0;
+}
+.row p {
+    font-size: 20px;
+}
+.row__number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-weight: 700;
+    background-color: #AAAAFF8F;
+}
+.row__name {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    padding: 0 0 0 10px;
+}
+.row__login {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    padding: 0 0 0 10px;
+}
+.row__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 16px;
+}
+.row__actions label {
+    margin: 0 4px 0 0;
+}
+.row__actions select {
+    width: fit-content;
+    font-size: 16px;
+}
+.row__accept {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    cursor: pointer;
+}
+.row__decline {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    cursor: pointer;
+    margin: 0 8px 0 16px;
+}

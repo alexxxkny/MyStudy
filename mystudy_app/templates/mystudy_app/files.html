@@ -115,7 +115,7 @@
             <img src="{% static 'mystudy_app/images/icons/download_icon.svg'%}" alt="">
         </a>
         </div>
-    <div class="file-node__delete">
+    <div class="file-node__delete" {% if not request.user.can_edit %}style="display: none"{% endif %}>
             <img src="{% static 'mystudy_app/images/icons/delete_icon.svg' %}" alt="">
         </div>
     <div class="file-node__img">

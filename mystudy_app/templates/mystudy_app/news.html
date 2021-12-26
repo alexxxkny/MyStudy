@@ -12,7 +12,7 @@
                 <div class="news-title__title">
                     <p>Новости</p>
                 </div>
-                <div class="news-title__add">
+                <div class="news-title__add" {% if not request.user.can_edit %}style="display: none"{% endif %}>
                     <div id="add-news-btn">
                         <img src="{% static 'mystudy_app/images/icons/big_plus_icon.svg' %}" alt="">
                     </div>

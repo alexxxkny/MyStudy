@@ -48,5 +48,5 @@ class RegistrationGroupForm(ModelForm):
                                                                             'placeholder': 'Направление'}))
 
     class Meta:
-        model = Group
+        model = StudentsGroup
         fields = ['name', 'organization', 'specialization']

@@ -8,10 +8,37 @@ from slugger import AutoSlugField
 
 class User(AbstractUser):
     middle_name = models.CharField(max_length=150, null=True, blank=True)
-    group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True)
+    students_group = models.ForeignKey('StudentsGroup', on_delete=models.SET_NULL, null=True)
+
+    def get_short_name(self):
+        short_name = f'{self.last_name} {self.first_name[0]}. '
+        if self.middle_name:
+            short_name += f'{self.middle_name[0]}.'
+        return short_name
+
+    def get_role_id(self):
+        return self.groups.all()[0].pk
+
+    def is_boss(self):
+        return self.get_role_id() == 4
+
+    def is_editor(self):
+        return self.get_role_id() == 3
+
+    def is_loner(self):
+        return self.get_role_id() == 1
+
+    def is_student(self):
+        return self.get_role_id() == 2
+
+    def can_edit(self):
+        return self.get_role_id() >= 3
+
+    def get_role_name(self):
+        return self.groups.all()[0].name
 
 
-class Group(models.Model):
+class StudentsGroup(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
     name = models.CharField(max_length=150, unique=True, verbose_name='Название группы')
     group_slug = AutoSlugField(populate_from='name', max_length=150, unique=True, verbose_name='URL')
@@ -26,12 +53,21 @@ class Group(models.Model):
         return f'Group(name={self.name})'
 
 
+class JoinRequest(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'JoinRequest(id={self.id}, user={self.user}, group={self.group})'
+
+
 class LessonTime(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
     order = models.SmallIntegerField()
     start = models.TimeField()
     end = models.TimeField()
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'LessonTime(order={self.order}, start={self.start}, end={self.end}, group={self.group})'
@@ -41,7 +77,7 @@ class WeekTemplate(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
     name = models.CharField(max_length=150, verbose_name='Неделя')
     order = models.SmallIntegerField()
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
 
 
 class TemplateLesson(models.Model):
@@ -58,7 +94,7 @@ class TemplateLesson(models.Model):
 class Lesson(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
     date = models.DateField(blank=True, null=True)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
     lesson_time = models.ForeignKey('LessonTime', on_delete=models.CASCADE, null=True)
     lesson_format = models.ForeignKey('LessonFormat', on_delete=models.SET_NULL, null=True)
     type = models.CharField(max_length=100, blank=True, null=True)
@@ -74,7 +110,7 @@ class LessonFormat(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
     name = models.CharField(max_length=20)
     color = models.CharField(max_length=6)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'LessonFormat(name={self.name}, color={self.color}, group={self.group})'
@@ -84,7 +120,7 @@ class Discipline(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
     name = models.CharField(max_length=50)
     short_name = models.CharField(max_length=10)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Discipline(id={self.id}, name={self.name}, short_name={self.short_name}, group={self.group})'
@@ -133,7 +169,7 @@ class File(models.Model):
     adding_datetime = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to=user_directory_path)
     discipline = models.ForeignKey('Discipline', on_delete=models.SET_NULL, null=True, blank=True)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
 
 
 class News(models.Model):
@@ -142,7 +178,7 @@ class News(models.Model):
     title = models.CharField(max_length=50)
     content = models.TextField(null=True, blank=True)
     adding_datetime = models.DateTimeField(auto_now_add=True)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StudentsGroup', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'News(id={self.id}, topic={self.topic}, title={self.title}, adding_datetime={self.adding_datetime}, ' \

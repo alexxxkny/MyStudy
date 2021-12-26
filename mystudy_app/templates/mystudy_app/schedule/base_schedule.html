@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block tools %}
-    <div class="header-nav__block">
+    <div class="header-nav__block" {% if not request.user.can_edit %}style="display: none"{% endif %}>
         <a href="{% url 'mystudy_app:schedule' %}">
             <div class="module-link">
                 <img class="" src="{% static 'mystudy_app/images/icons/nav/schedule.svg' %}" alt="">
@@ -16,7 +16,7 @@
             </div>
         </a>
     </div>
-    <div class="header-nav__block">
+    <div class="header-nav__block" {% if not request.user.can_edit %}style="display: none"{% endif %}>
         <a href="{% url 'mystudy_app:week_templates' %}">
             <div class="module-link">
                 <img class="" src="{% static 'mystudy_app/images/icons/nav/schedule_template_icon.svg' %}" alt="">
@@ -24,7 +24,7 @@
             </div>
         </a>
     </div>
-    <div class="header-nav__block">
+    <div class="header-nav__block" {% if not request.user.can_edit %}style="display: none"{% endif %}>
         <a href="{% url 'mystudy_app:disciplines' %}">
             <div class="module-link">
                 <img class="" src="{% static 'mystudy_app/images/icons/nav/disciplines_icon.svg' %}" alt="">
@@ -32,7 +32,7 @@
             </div>
         </a>
     </div>
-    <div class="header-nav__block">
+    <div class="header-nav__block" {% if not request.user.can_edit %}style="display: none"{% endif %}>
         <a href="{% url 'mystudy_app:schedule_settings' %}">
             <div class="module-link">
                 <img class="" src="{% static 'mystudy_app/images/icons/nav/settings_icon.svg' %}" alt="">

@@ -44,14 +44,20 @@
                 <div class="profile-table__value">
                     <p>{{ request.user.email }}</p>
                 </div>
-                {% if request.user.group %}
+                {% if request.user.students_group %}
                     <div class="profile-table__label">
                         <p>Группа</p>
                     </div>
                     <div class="profile-table__value">
-                        <p>{{ request.user.group.name }}</p>
+                        <p>{{ request.user.students_group.name }}</p>
                     </div>
                 {% endif %}
+                <div class="profile-table__label">
+                    <p>Роль</p>
+                </div>
+                <div class="profile-table__value">
+                    <p>{{ request.user.get_role_name }}</p>
+                </div>
             </div>
         </div>
     </div>

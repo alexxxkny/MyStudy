@@ -3,8 +3,6 @@ from .views import *
 
 app_name = 'mystudy_app'
 urlpatterns = [
-    path('', index, name='home'),
-
     path('news/', NewsPage.as_view(), name='news'),
 
     path('schedule/', SchedulePage.as_view(), name='schedule'),
@@ -24,5 +22,5 @@ urlpatterns = [
     path('groups/', AllGroupsView.as_view(), name='all_groups'),
     path('groups/<slug:group_slug>', GroupView.as_view(), name='group'),
     path('profile/', ProfileView.as_view(), name='profile'),
-    # path('groups/join', GroupView.as_view(), name='group'),
+    path('my_group/', GroupView.as_view(), name='group_control'),
 ]

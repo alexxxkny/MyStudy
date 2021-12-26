@@ -86,6 +86,7 @@ const times_table_observer = new MutationObserver(async (mutations) => {
                     if(!(item instanceof HTMLElement)) continue
                     let times = item.querySelectorAll('input[type=time]')
                     for(let item of times){
+                        console.log('set')
                         item.addEventListener('change', commitTimeChanging)
                     }
                 }
@@ -101,17 +102,18 @@ times_table_observer.observe(times_table, {
 
 async function commitTimeChanging(e){
     let first_block, first_input, second_input
-    console.log(e.currentTarget.parentElement.nextElementSibling)
-    if(e.currentTarget.parentElement.nextElementSibling){
-        first_input = e.currentTarget
-        second_input = first_input.parentElement.nextElementSibling.children[0]
-        first_block = first_input.parentElement.previousElementSibling
-    } else {
+    if(e.currentTarget.parentElement.classList.contains('left-border')) {
         first_input = e.currentTarget.parentElement.previousElementSibling.children[0]
         second_input = e.currentTarget
         first_block = first_input.parentElement.previousElementSibling
+    } else {
+        first_input = e.currentTarget
+        second_input = first_input.parentElement.nextElementSibling.children[0]
+        first_block = first_input.parentElement.previousElementSibling
     }
     if(second_input.value){
+        console.log(first_input.value)
+        console.log(second_input.value)
         console.log('sending...')
         let time_id = first_block.getAttribute('data-id')
         if(time_id === 'none'){

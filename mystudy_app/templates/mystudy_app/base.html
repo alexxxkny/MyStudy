@@ -66,6 +66,11 @@
                 <img class="profile-icon" src="{% static 'mystudy_app/images/icons/nav/user.svg' %}" alt="">
             </a>
         </div>
+        <div class="header-nav__block" {% if not request.user.is_boss %}style="display: none"{% endif %}>
+            <a href="{% url 'mystudy_app:group_control' %}">
+                <img class="profile-icon" src="{% static 'mystudy_app/images/icons/nav/group_icon.svg' %}" alt="">
+            </a>
+        </div>
         <div class="header-nav__block">
             <a href="{% url 'mystudy_app:logout' %}">
                 <img class="exit-icon" src="{% static 'mystudy_app/images/icons/nav/exit.svg' %}" alt="">

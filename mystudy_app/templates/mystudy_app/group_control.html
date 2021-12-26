@@ -1,0 +1,75 @@
+{% extends 'mystudy_app/base.html' %}
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'mystudy_app/css/group_control.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="narrow-content">
+        <div class="group-control">
+            <div class="group-control-title">
+                <p>Управление группой</p>
+            </div>
+            <div class="menu-block">
+                <div class="menu-block__title">
+                    <p>Запросы на добавление</p>
+                </div>
+                <div id="requests-list" class="menu-block__table">
+                    {% for join_request in requests %}
+                        <div data-id="{{ join_request.pk }}" class="row">
+                            <div class="row__number">
+                                <p>{{ forloop.counter }}</p>
+                            </div>
+                            <div class="row__name">
+                                <p>{{ join_request.user.get_short_name }}</p>
+                            </div>
+                            <div class="row__login">
+                                <p>{{ join_request.user.username }}</p>
+                            </div>
+                            <div class="row__actions">
+                                <div class="row__accept">
+                                    <img src="{% static 'mystudy_app/images/icons/check_icon.svg' %}" alt="">
+                                </div>
+                                <div class="row__decline">
+                                    <img src="{% static 'mystudy_app/images/icons/decline_icon.svg' %}" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="menu-block">
+            <div class="menu-block__title">
+                <p>Права редактирования</p>
+            </div>
+            <div id="users-list" class="menu-block__table">
+                {% for student in students %}
+                    <div data-id="{{ student.pk }}" class="row">
+                        <div class="row__number">
+                            <p>{{ forloop.counter }}</p>
+                        </div>
+                        <div class="row__name">
+                            <p>{{ student.get_short_name }}</p>
+                        </div>
+                        <div class="row__login">
+                            <p>{{ student.username }}</p>
+                        </div>
+                        <div class="row__actions">
+                            <label for="permission_group">Роль: </label>
+                            <select name="permission_group_id" id="permission_group">
+                                <option value="2" {% if student.is_student %}selected{% endif %}>Студент</option>
+                                <option value="3" {% if student.is_editor %}selected{% endif %}>Студент-редактор</option>
+                            </select>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="module" src="{% static 'mystudy_app/js/group_control.js' %}"></script>
+{% endblock %}

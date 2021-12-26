@@ -9,7 +9,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'last_name', 'first_name', 'middle_name', 'email', 'is_superuser')
 
 
-@admin.register(Group)
+@admin.register(StudentsGroup)
 class GroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'group_slug')
 
@@ -63,6 +63,12 @@ class TaskAdmin(admin.ModelAdmin):
 class FileAdmin(admin.ModelAdmin):
     list_display = ('id', 'adding_datetime', 'file', 'group')
 
+
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
     list_display = ('id', 'adding_datetime', 'title', 'group')
+
+
+@admin.register(JoinRequest)
+class JoinRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'group')

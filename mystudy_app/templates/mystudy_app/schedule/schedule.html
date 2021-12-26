@@ -52,7 +52,10 @@
             </div>
     </div>
     </div>
-    <div id="edit-lesson-popup-bg" class="base-popup-background">
+{% endblock %}
+
+{% block popups %}
+    <div id="edit-lesson-popup-bg" class="base-popup-background" {% if not request.user.can_edit %}style="display: none"{% endif %}>
         <div id="edit-lesson-popup" class="base-popup">
             <div class="base-popup__inner">
                 <div id="delete-lesson" class="delete_btn">
@@ -82,8 +85,8 @@
                 </form>
             </div>
         </div>
-    </div>
-    <div id="choose-action-popup-bg" class="base-popup-background">
+    </div   >
+    <div id="choose-action-popup-bg" class="base-popup-background" {% if not request.user.can_edit %}style="display: none"{% endif %}>
         <div id="choose-action-popup" class="base-popup">
             <div class="base-popup__inner">
                 <p class="edit-node-title">Это шаблонное занятие</p>
@@ -96,7 +99,7 @@
             </div>
         </div>
     </div>
-    <div id="uncancel-lesson-popup-bg" class="base-popup-background">
+    <div id="uncancel-lesson-popup-bg" class="base-popup-background" {% if not request.user.can_edit %}style="display: none"{% endif %}>
         <div id="uncancel-lesson-popup" class="base-popup">
             <div class="base-popup__inner">
                 <p class="edit-node-title">Это занятие было отменено</p>

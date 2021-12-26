@@ -2,6 +2,7 @@ import datetime
 import mimetypes
 
 import data as data
+from django.contrib.auth.models import Group
 from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -31,7 +32,7 @@ class ScheduleTableHandler:
         table = {'0': {}, '1': {}, '2': {}, '3': {}, '4': {}, '5': {}}
         template_lessons = TemplateLesson.objects.filter(
             week_template=data['template_id'],
-            week_template__group=request.user.group,
+            week_template__group=request.user.students_group,
         )
         for template_lesson in template_lessons:
             lesson = template_lesson.lesson
@@ -48,13 +49,13 @@ class ScheduleTableHandler:
     @staticmethod
     def make_full_table(request, data):
         current_date = datetime.datetime.strptime(data['week_start'], '%Y-%m-%d').date()
-        template_id = ScheduleTableHandler.get_template_id(request.user.group, current_date)
+        template_id = ScheduleTableHandler.get_template_id(request.user.students_group, current_date)
         table = ScheduleTableHandler.make_template_table(request, {'template_id': template_id})
 
         week_start = date.fromisoformat(data['week_start'])
         week_end = date.fromisoformat(data['week_end'])
         custom_lessons = Lesson.objects.filter(
-            group=request.user.group,
+            group=request.user.students_group,
             date__range=(week_start, week_end),
             status__istartswith='custom'
         )
@@ -143,10 +144,10 @@ class NewsPage(LoginRequiredMixin, TemplateView):
     login_url = 'mystudy_app:login'
 
     def get(self, request, *args, **kwargs):
-        if request.user.group is None:
+        if request.user.students_group is None:
             return redirect('mystudy_app:all_groups')
         context = {
-            'news_list': News.objects.filter(group=request.user.group).order_by('-adding_datetime')
+            'news_list': News.objects.filter(group=request.user.students_group).order_by('-adding_datetime')
         }
         return render(request, self.template_name, context)
 
@@ -166,7 +167,7 @@ class NewsPage(LoginRequiredMixin, TemplateView):
                 title=data['title'],
                 content=data['content'],
                 topic='custom',
-                group=request.user.group
+                group=request.user.students_group
             )
         except Exception as e:
             return json_error_response(e)
@@ -183,14 +184,14 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
     login_url = 'mystudy_app:login'
 
     def get(self, request, *args, **kwargs):
-        if request.user.group is None:
+        if request.user.students_group is None:
             return redirect('mystudy_app:all_groups')
         week_start, week_end = self.get_week_dates()
         context = {
-            'disciplines': Discipline.objects.filter(group=request.user.group),
-            'templates': WeekTemplate.objects.filter(group=request.user.group).order_by('order'),
-            'lesson_times': LessonTime.objects.filter(group=request.user.group).order_by('order'),
-            'formats': LessonFormat.objects.filter(group=request.user.group),
+            'disciplines': Discipline.objects.filter(group=request.user.students_group),
+            'templates': WeekTemplate.objects.filter(group=request.user.students_group).order_by('order'),
+            'lesson_times': LessonTime.objects.filter(group=request.user.students_group).order_by('order'),
+            'formats': LessonFormat.objects.filter(group=request.user.students_group),
             'week_start': week_start,
             'week_end': week_end,
         }
@@ -253,7 +254,7 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
             canceled_lesson = Lesson.objects.create(
                 status='custom-canceled',
                 discipline=template_lesson.lesson.discipline,
-                group=request.user.group,
+                group=request.user.students_group,
                 lesson_time=template_lesson.lesson.lesson_time,
                 date=date.fromisoformat(current_date),
                 lesson_format=template_lesson.lesson.lesson_format,
@@ -279,7 +280,7 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
                 topic='schedule',
                 title='Занятие отменено',
                 content=news_content,
-                group=request.user.group
+                group=request.user.students_group
             )
             return json_success_response({
                 'id': canceled_lesson.pk,
@@ -292,7 +293,7 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
             lesson_format = LessonFormat.objects.get(pk=int(data['format_id']))
             new_lesson = Lesson.objects.create(
                 date=date.fromisoformat(data['current_date']),
-                group=request.user.group,
+                group=request.user.students_group,
                 lesson_time=LessonTime.objects.get(pk=int(data['time_id'])),
                 lesson_format=lesson_format,
                 type=data['type'],
@@ -317,7 +318,7 @@ class SchedulePage(LoginRequiredMixin, TemplateView):
                 topic='schedule',
                 title='Добавлено занятие',
                 content=news_content,
-                group=request.user.group
+                group=request.user.students_group
             )
             return json_success_response({
                 'id': new_lesson.pk,
@@ -376,7 +377,7 @@ class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
             elif query['action'] == 'add':
                 name = query['name']
                 color = query['color']
-                group = request.user.group
+                group = request.user.students_group
                 try:
                     new_obj = LessonFormat.objects.create(name=name, color=color, group=group)
                 except:
@@ -396,7 +397,7 @@ class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
                     new_obj = LessonTime.objects.create(order=order,
                                                         start=time(start[0], start[1]),
                                                         end=time(end[0], end[1]),
-                                                        group=request.user.group)
+                                                        group=request.user.students_group)
                 except Exception as e:
                     print(e)
                 else:
@@ -408,7 +409,7 @@ class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
                 try:
                     new_obj = LessonTime.objects.filter(pk=time_id).update(start=time(start[0], start[1]),
                                                                            end=time(end[0], end[1]),
-                                                                           group=request.user.group)
+                                                                           group=request.user.students_group)
                 except Exception as e:
                     print(e)
                 else:
@@ -424,8 +425,8 @@ class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
             elif query['action'] == 'set_schedule_start':
                 try:
                     new_date = query['date']
-                    request.user.group.schedule_start = date.fromisoformat(new_date)
-                    request.user.group.save()
+                    request.user.students_group.schedule_start = date.fromisoformat(new_date)
+                    request.user.students_group.save()
                 except Exception as e:
                     print(traceback.format_exc())
                     print(e)
@@ -436,13 +437,17 @@ class ScheduleSettingsPage(LoginRequiredMixin, TemplateView):
                 return HttpResponse()
 
     def get(self, request, *args, **kwargs):
-        if request.user.group is None:
+        if request.user.students_group is None:
             return redirect('mystudy_app:all_groups')
+        if request.user.students_group.schedule_start:
+            schedule_start = date.isoformat(request.user.students_group.schedule_start)
+        else:
+            schedule_start = None
         context = {
-            'lessons': Discipline.objects.filter(group=request.user.group),
-            'schedule_start': date.isoformat(request.user.group.schedule_start),
-            'formats': LessonFormat.objects.filter(group=request.user.group),
-            'lessons_time': LessonTime.objects.filter(group=request.user.group),
+            'lessons': Discipline.objects.filter(group=request.user.students_group),
+            'schedule_start': schedule_start,
+            'formats': LessonFormat.objects.filter(group=request.user.students_group),
+            'lessons_time': LessonTime.objects.filter(group=request.user.students_group),
         }
         return render(request, ScheduleSettingsPage.template_name, context)
 
@@ -452,13 +457,13 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
     login_url = 'mystudy_app:login'
 
     def get(self, request, *args, **kwargs):
-        if request.user.group is None:
+        if request.user.students_group is None:
             return redirect('mystudy_app:all_groups')
         context = {
-            'disciplines': Discipline.objects.filter(group=request.user.group),
-            'templates': WeekTemplate.objects.filter(group=request.user.group).order_by('order'),
-            'lesson_times': LessonTime.objects.filter(group=request.user.group).order_by('order'),
-            'formats': LessonFormat.objects.filter(group=request.user.group)
+            'disciplines': Discipline.objects.filter(group=request.user.students_group),
+            'templates': WeekTemplate.objects.filter(group=request.user.students_group).order_by('order'),
+            'lesson_times': LessonTime.objects.filter(group=request.user.students_group).order_by('order'),
+            'formats': LessonFormat.objects.filter(group=request.user.students_group)
         }
         return render(request, self.template_name, context)
 
@@ -484,7 +489,7 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
     def change_template_name(request, data):
         try:
             template_id = data['id']
-            template = WeekTemplate.objects.get(pk=template_id, group=request.user.group)
+            template = WeekTemplate.objects.get(pk=template_id, group=request.user.students_group)
             template.name = data['name']
             template.save()
         except WeekTemplate.DoesNotExist:
@@ -502,8 +507,8 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
             template_id = data['id']
             old_order = data['old_order']
             new_order = data['new_order']
-            first_template = WeekTemplate.objects.get(pk=template_id, group=request.user.group)
-            second_template = WeekTemplate.objects.get(order=new_order, group=request.user.group)
+            first_template = WeekTemplate.objects.get(pk=template_id, group=request.user.students_group)
+            second_template = WeekTemplate.objects.get(order=new_order, group=request.user.students_group)
             first_template.order = new_order
             second_template.order = old_order
             first_template.save()
@@ -525,7 +530,7 @@ class ScheduleTemplatesPage(ScheduleTableHandler, LoginRequiredMixin, TemplateVi
         try:
             lesson_format = LessonFormat.objects.get(pk=int(data['format_id']))
             new_lesson = Lesson.objects.create(
-                group=request.user.group,
+                group=request.user.students_group,
                 lesson_time=LessonTime.objects.get(pk=int(data['time_id'])),
                 lesson_format=lesson_format,
                 type=data['type'],
@@ -591,7 +596,7 @@ class DisciplinesPage(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = {
-            'lessons': Discipline.objects.filter(group=request.user.group)
+            'lessons': Discipline.objects.filter(group=request.user.students_group)
         }
         return render(request, self.template_name, context)
 
@@ -638,7 +643,7 @@ class DisciplinesPage(LoginRequiredMixin, TemplateView):
             new_discipline = Discipline.objects.create(
                 name=data['name'],
                 short_name=data['short_name'],
-                group=request.user.group
+                group=request.user.students_group
             )
         except Exception as e:
             return json_error_response(e)
@@ -707,7 +712,7 @@ class TasksPage(LoginRequiredMixin, TemplateView):
     @staticmethod
     def get_discipline_labels(request):
         discipline_labels = {}
-        for discipline in Discipline.objects.filter(group=request.user.group):
+        for discipline in Discipline.objects.filter(group=request.user.students_group):
             label, created = discipline.disciplinelabel_set.get_or_create(user=request.user, defaults={
                 'color': '#FF0000',
                 'discipline': discipline
@@ -840,10 +845,10 @@ class FilesPage(LoginRequiredMixin, TemplateView):
     login_url = 'mystudy_app:login'
 
     def get(self, request, *args, **kwargs):
-        if request.user.group is None:
+        if request.user.students_group is None:
             return redirect('mystudy_app:all_groups')
         context = {
-            'files': File.objects.filter(group=request.user.group),
+            'files': File.objects.filter(group=request.user.students_group),
             'discipline_labels': TasksPage.get_discipline_labels(request)
         }
         return render(request, self.template_name, context)
@@ -874,7 +879,7 @@ class FilesPage(LoginRequiredMixin, TemplateView):
     @staticmethod
     def get_discipline_labels(request):
         discipline_labels = {}
-        for discipline in Discipline.objects.filter(group=request.user.group):
+        for discipline in Discipline.objects.filter(group=request.user.students_group):
             label, created = discipline.disciplinelabel_set.get_or_create(user=request.user, defaults={
                 'color': '#FF0000',
                 'discipline': discipline
@@ -901,7 +906,7 @@ class FilesPage(LoginRequiredMixin, TemplateView):
     @staticmethod
     def get_files(request):
         files_data = {}
-        files = File.objects.filter(group=request.user.group)
+        files = File.objects.filter(group=request.user.students_group)
         for file in files:
             if file.discipline:
                 discipline_label_id = file.discipline.disciplinelabel_set.get(user=request.user).pk
@@ -929,7 +934,7 @@ class FilesPage(LoginRequiredMixin, TemplateView):
             new_file = File.objects.create(
                 file=files['file'],
                 discipline=discipline,
-                group=request.user.group
+                group=request.user.students_group
             )
         except DisciplineLabel.DoesNotExist:
             return json_error_response('Неверны DisciplineLabel ID')
@@ -945,7 +950,7 @@ class FilesPage(LoginRequiredMixin, TemplateView):
             News.objects.create(
                 topic='files',
                 title='Загружен новый файл',
-                group=request.user.group,
+                group=request.user.students_group,
                 content=news_content
             )
             return json_success_response({
@@ -979,13 +984,14 @@ class FilesPage(LoginRequiredMixin, TemplateView):
 class RegisterUserView(CreateView):
     form_class = RegisterUserForm
     template_name = 'mystudy_app/auth/register.html'
-    success_url = reverse_lazy('mystudy_app:home')
+    success_url = reverse_lazy('mystudy_app:news')
     extra_context = {'title': 'Регистрация'}
 
     def form_valid(self, form):
         user = form.save()
+        user.groups.add(Group.objects.get(pk=1))
         login(self.request, user)
-        return redirect('mystudy_app:home')
+        return redirect('mystudy_app:news')
 
 
 class LoginUserView(LoginView):
@@ -994,7 +1000,7 @@ class LoginUserView(LoginView):
     extra_context = {'title': 'Войти'}
 
     def get_success_url(self):
-        return reverse_lazy('mystudy_app:home')
+        return reverse_lazy('mystudy_app:news')
 
 
 class RegisterGroupView(LoginRequiredMixin, CreateView):
@@ -1004,9 +1010,33 @@ class RegisterGroupView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('mystudy_app:all_groups')
 
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        new_group = StudentsGroup.objects.create(
+            name=data['name'],
+            organization=data['organization'],
+            specialization=data['specialization'],
+        )
+        request.user.students_group = new_group
+        request.user.groups.add(Group.objects.get(pk=4))
+        request.user.groups.remove(Group.objects.get(pk=1))
+        request.user.save()
+        WeekTemplate.objects.create(
+            name='Четная',
+            order=1,
+            group=new_group
+        )
+        WeekTemplate.objects.create(
+            name='Нечетная',
+            order=2,
+            group=new_group
+        )
+        print(request.user.groups.all())
+        return redirect('mystudy_app:news')
+
 
 class AllGroupsView(LoginRequiredMixin, ListView):
-    model = Group
+    model = StudentsGroup
     template_name = 'mystudy_app/auth/select_group.html'
     context_object_name = 'groups'
     login_url = 'mystudy_app:login'
@@ -1017,26 +1047,100 @@ class AllGroupsView(LoginRequiredMixin, ListView):
             query = rf'\w*{query}\w*'
         else:
             query = r'\w*'
-        return render(request, self.template_name, {'groups': Group.objects.filter(name__iregex=query)})
+        return render(request, self.template_name, {'groups': StudentsGroup.objects.filter(name__iregex=query)})
 
     def post(self, request, *args, **kwargs):
         group_id = request.POST.get('group_pk', default=False)
         if group_id:
-            group = Group.objects.get(pk=group_id)
-            request.user.group = group
-            request.user.save()
-            return redirect('mystudy_app:group', group_slug=group.group_slug)
-        else:
-            self.get(request, *args, **kwargs)
+            try:
+                group = StudentsGroup.objects.get(pk=group_id)
+            except StudentsGroup.DoesNotExist:
+                raise Http404
+            else:
+                # Creating an joining request
+                JoinRequest.objects.create(
+                    user=request.user,
+                    group=group
+                )
+        return self.get(request, *args, **kwargs)
 
 
-class GroupView(LoginRequiredMixin, DetailView):
-    model = Group
-    template_name = 'mystudy_app/group.html'
-    context_object_name = 'group'
-    slug_field = 'group_slug'
-    slug_url_kwarg = 'group_slug'
+class GroupView(LoginRequiredMixin, TemplateView):
+    template_name = 'mystudy_app/group_control.html'
     login_url = 'mystudy_app:login'
+
+    def get(self, request, *args, **kwargs):
+        context = {
+            'permission_groups': Group.objects.all(),
+            'requests': JoinRequest.objects.filter(group=request.user.students_group),
+            'students': User.objects.filter(students_group=request.user.students_group).exclude(pk=request.user.pk)
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        if 'json' in request.content_type:
+            query = json.loads(request.body)
+            if 'action' in query:
+                action = query['action']
+                if action == 'accept_request':
+                    return self.accept_request(request, query['data'])
+                elif action == 'decline_request':
+                    return self.decline_request(request, query['data'])
+                elif action == 'change_role':
+                    return self.change_role(request, query['data'])
+        raise Http404
+
+    @staticmethod
+    def accept_request(request, data):
+        try:
+            join_request = JoinRequest.objects.get(pk=int(data['id']))
+            user = join_request.user
+            group = join_request.group
+            user.students_group = group
+            user.groups.clear()
+            user.groups.add(Group.objects.get(pk=2))
+            user.save()
+            join_request.delete()
+        except JoinRequest.DoesNotExist:
+            return json_error_response('Неверный JoinRequest ID')
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def decline_request(request, data):
+        try:
+            join_request = JoinRequest.objects.get(pk=int(data['id']))
+            join_request.delete()
+        except JoinRequest.DoesNotExist:
+            return json_error_response('Неверный JoinRequest ID')
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+            return json_error_response(e)
+        else:
+            return json_success_response()
+
+    @staticmethod
+    def change_role(request, data):
+        try:
+            user = User.objects.get(pk=data['user_id'])
+            user.groups.clear()
+            user.groups.add(Group.objects.get(pk=data['role_id']))
+            user.save()
+        except User.DoesNotExist:
+            return json_error_response('Неверный User ID')
+        except Group.DoesNotExist:
+            return json_error_response('Неверный Group ID')
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+            return json_error_response(e)
+        else:
+            return json_success_response()
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):
